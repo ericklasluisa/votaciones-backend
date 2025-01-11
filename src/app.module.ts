@@ -1,6 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ProvinciaModule } from './provincia/provincia.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CantonModule } from './canton/canton.module';
+import { CircunscripcionModule } from './circunscripcion/circunscripcion.module';
+import { ParroquiaModule } from './parroquia/parroquia.module';
+import { RecintoModule } from './recinto/recinto.module';
+import { ZonaModule } from './zona/zona.module';
+import { JuntaModule } from './junta/junta.module';
+import { VotoModule } from './voto/voto.module';
+import { CandidatoModule } from './candidato/candidato.module';
+import { DignidadModule } from './dignidad/dignidad.module';
+import { PartidoModule } from './partido/partido.module';
+import { SimulacionModule } from './simulacion/simulacion.module';
 
 @Module({
   imports: [
@@ -16,6 +27,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       database: 'votaciones',
     }),
     ProvinciaModule,
+    CantonModule,
+    CircunscripcionModule,
+    ParroquiaModule,
+    RecintoModule,
+    ZonaModule,
+    JuntaModule,
+    VotoModule,
+    CandidatoModule,
+    DignidadModule,
+    PartidoModule,
+    SimulacionModule,
   ],
   controllers: [],
   providers: [],

@@ -1,9 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Canton } from 'src/canton/entities/canton.entity';
+import { Dignidad } from 'src/dignidad/entities/dignidad.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Provincia {
   @PrimaryGeneratedColumn('uuid')
-  idProvincia: number;
+  idProvincia: string;
 
   @Column('int', {
     nullable: false,
@@ -13,37 +15,44 @@ export class Provincia {
 
   @Column('varchar', {
     nullable: false,
-    length: 50,
+    length: 60,
   })
   nombreProvincia: string;
 
   @Column('int', {
-    nullable: false,
+    nullable: true,
   })
-  numElectores: number;
+  numElectores: number | null;
 
   @Column('int', {
-    nullable: false,
+    nullable: true,
   })
-  numMujeres: number;
+  numMujeres: number | null;
 
   @Column('int', {
-    nullable: false,
+    nullable: true,
   })
-  numHombres: number;
+  numHombres: number | null;
 
   @Column('int', {
-    nullable: false,
+    nullable: true,
   })
-  numJunta: number;
+  numJunta: number | null;
 
   @Column('int', {
-    nullable: false,
+    nullable: true,
   })
-  numJuntasMujeres: number;
+  numJuntasMujeres: number | null;
 
   @Column('int', {
-    nullable: false,
+    nullable: true,
   })
-  numJuntasHombres: number;
+  numJuntasHombres: number | null;
+
+  //relaciones
+  @OneToMany(() => Canton, (canton) => canton.provincia)
+  cantones: Canton[];
+
+  @OneToMany(() => Dignidad, (dignidad) => dignidad.provincia)
+  dignidades: Dignidad[];
 }
