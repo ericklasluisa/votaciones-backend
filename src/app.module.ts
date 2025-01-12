@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ProvinciaModule } from './provincia/provincia.module';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { ProvinciaModule } from './provincia/provincia.module';
 import { CantonModule } from './canton/canton.module';
 import { CircunscripcionModule } from './circunscripcion/circunscripcion.module';
 import { ParroquiaModule } from './parroquia/parroquia.module';
@@ -15,16 +17,16 @@ import { SimulacionModule } from './simulacion/simulacion.module';
 
 @Module({
   imports: [
-    //! Configurar base de datos, usuario, contraseña
-    //TODO Configurar entidades
-    //TODO Configurar variables de entorno
+    ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'root',
-      password: 'root',
-      database: 'votaciones',
+      host: process.env.DB_HOST,
+      port: +process.env.DB_PORT,
+      database: process.env.DB_NAME,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      autoLoadEntities: true,
+      synchronize: true, //! TODO: Eliminar cuando se pase a producción
     }),
     ProvinciaModule,
     CantonModule,
