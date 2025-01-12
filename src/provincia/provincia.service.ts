@@ -8,6 +8,9 @@ import { CreateProvinciaDto } from './dto/create-provincia.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Provincia } from './entities/provincia.entity';
 import { Repository } from 'typeorm';
+import * as xlsx from 'xlsx';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 
 @Injectable()
 export class ProvinciaService {
@@ -16,6 +19,42 @@ export class ProvinciaService {
     @InjectRepository(Provincia)
     private readonly provinciaRepository: Repository<Provincia>,
   ) {}
+
+  async loadExcelData(filePath: string): Promise<string> {
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+    const provinciasDtos = data.map((row: any) =>
+      plainToInstance(CreateProvinciaDto, {
+        codigoProvincia: parseInt(row['codigoProvincia'], 10),
+        nombreProvincia: row['nombreProvincia'],
+        numElectores: parseInt(row['numElectores'], 10),
+        numMujeres: parseInt(row['numMujeres'], 10),
+        numHombres: parseInt(row['numHombres'], 10),
+        numJunta: parseInt(row['numJunta'], 10),
+        numJuntasMujeres: parseInt(row['numJuntasMujeres'], 10),
+        numJuntasHombres: parseInt(row['numJuntasHombres'], 10),
+      }),
+    );
+
+    for (const dto of provinciasDtos) {
+      const errors = await validate(dto);
+      if (errors.length > 0) {
+        throw new Error(`Error en la fila: ${JSON.stringify(errors)}`);
+      }
+    }
+
+    try {
+      const provincias = provinciasDtos.map((dto) =>
+        this.provinciaRepository.create(dto),
+      );
+      await this.provinciaRepository.save(provincias);
+      return 'Provincias cargadas correctamente';
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
+  }
 
   async create(createProvinciaDto: CreateProvinciaDto) {
     try {
