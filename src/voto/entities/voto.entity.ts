@@ -1,4 +1,5 @@
 import { Candidato } from 'src/candidato/entities/candidato.entity';
+import { Junta } from 'src/junta/entities/junta.entity';
 import { Simulacion } from 'src/simulacion/entities/simulacion.entity';
 import {
   Column,
@@ -25,11 +26,11 @@ export class Voto {
   cantidad: number;
 
   // relaciones
-  @ManyToOne(() => Voto, (voto) => voto.junta, {
+  @ManyToOne(() => Junta, (junta) => junta.votos, {
     nullable: false,
   })
   @JoinColumn({ name: 'idJunta' })
-  junta: Voto;
+  junta: Junta;
 
   @ManyToOne(() => Simulacion, (simulacion) => simulacion.votos, {
     nullable: false,
