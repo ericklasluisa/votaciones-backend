@@ -14,6 +14,7 @@ import { CandidatoModule } from './candidato/candidato.module';
 import { DignidadModule } from './dignidad/dignidad.module';
 import { PartidoModule } from './partido/partido.module';
 import { SimulacionModule } from './simulacion/simulacion.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { SimulacionModule } from './simulacion/simulacion.module';
     DignidadModule,
     PartidoModule,
     SimulacionModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],

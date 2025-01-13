@@ -1,20 +1,35 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsInt, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateProvinciaDto {
-  @IsNumber()
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
   codigoProvincia: number;
+
   @IsString()
   nombreProvincia: string;
-  @IsNumber()
+
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
   numElectores: number;
-  @IsNumber()
+
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
   numMujeres: number;
-  @IsNumber()
+
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
   numHombres: number;
-  @IsNumber()
+
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
   numJunta: number;
-  @IsNumber()
+
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
   numJuntasMujeres: number;
-  @IsNumber()
+
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
   numJuntasHombres: number;
 }
