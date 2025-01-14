@@ -1,26 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Parroquia } from './entities/parroquia.entity';
+import { Repository } from 'typeorm';
+import { Canton } from 'src/canton/entities/canton.entity';
+import { Circunscripcion } from 'src/circunscripcion/entities/circunscripcion.entity';
+import { CommonService } from 'src/common/common.service';
 import { CreateParroquiaDto } from './dto/create-parroquia.dto';
-import { UpdateParroquiaDto } from './dto/update-parroquia.dto';
 
 @Injectable()
 export class ParroquiaService {
-  create(createParroquiaDto: CreateParroquiaDto) {
-    return 'This action adds a new parroquia';
+  private readonly logger = new Logger('ParroquiaService');
+
+  constructor(
+    @InjectRepository(Parroquia)
+    private readonly parroquiaRepository: Repository<Parroquia>,
+    @InjectRepository(Canton)
+    private readonly cantonRepository: Repository<Canton>,
+    @InjectRepository(Circunscripcion)
+    private readonly circunscripcionRepository: Repository<Circunscripcion>,
+    private readonly commonService: CommonService,
+  ) {}
+
+  async cargaMasivaParroquia(filePath: string): Promise<string> {
+    return await this.commonService.loadExcelData<
+      Parroquia,
+      CreateParroquiaDto
+    >(filePath, CreateParroquiaDto, this.parroquiaRepository, {
+      canton: {
+        repo: this.cantonRepository,
+        field: 'codigoCanton',
+      },
+      circunscripcion: {
+        repo: this.circunscripcionRepository,
+        field: 'nombreCircunscripcion',
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all parroquia`;
+  async findAll() {
+    return await this.parroquiaRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} parroquia`;
-  }
+  private handleDBExceptions(error: any) {
+    if (error.code === '23505') throw new BadRequestException(error.detail);
 
-  update(id: number, updateParroquiaDto: UpdateParroquiaDto) {
-    return `This action updates a #${id} parroquia`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} parroquia`;
+    this.logger.error(error);
+    throw new InternalServerErrorException(
+      'Error inesperado, revisar los logs del servidor',
+    );
   }
 }
