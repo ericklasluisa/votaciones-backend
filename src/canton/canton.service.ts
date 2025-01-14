@@ -63,6 +63,12 @@ export class CantonService {
     return await this.cantonRepository.find();
   }
 
+  async findByProvincia(idProvincia: string) {
+    return await this.cantonRepository.find({
+      where: { provincia: { idProvincia } },
+    });
+  }
+
   private handleDBExceptions(error: any) {
     if (error.code === '23505') throw new BadRequestException(error.detail);
 
