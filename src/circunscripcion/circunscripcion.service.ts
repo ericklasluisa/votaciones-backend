@@ -1,26 +1,54 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { CommonService } from 'src/common/common.service';
+import { Circunscripcion } from './entities/circunscripcion.entity';
 import { CreateCircunscripcionDto } from './dto/create-circunscripcion.dto';
-import { UpdateCircunscripcionDto } from './dto/update-circunscripcion.dto';
 
 @Injectable()
 export class CircunscripcionService {
-  create(createCircunscripcionDto: CreateCircunscripcionDto) {
-    return 'This action adds a new circunscripcion';
+  private readonly logger = new Logger('CircunscripcionService');
+  constructor(
+    @InjectRepository(Circunscripcion)
+    private readonly circunscripcionRepository: Repository<Circunscripcion>,
+    private readonly commonService: CommonService,
+  ) {}
+
+  async cargaMasivaCircunscripcion(filePath: string): Promise<string> {
+    return await this.commonService.loadExcelData<
+      Circunscripcion,
+      CreateCircunscripcionDto
+    >(filePath, CreateCircunscripcionDto, this.circunscripcionRepository);
   }
 
-  findAll() {
-    return `This action returns all circunscripcion`;
+  async create(createCircunscripcionDto: CreateCircunscripcionDto) {
+    try {
+      const circunscripcion = this.circunscripcionRepository.create(
+        createCircunscripcionDto,
+      );
+      await this.circunscripcionRepository.save(circunscripcion);
+      return circunscripcion;
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} circunscripcion`;
+  async findAll() {
+    return await this.circunscripcionRepository.find();
   }
 
-  update(id: number, updateCircunscripcionDto: UpdateCircunscripcionDto) {
-    return `This action updates a #${id} circunscripcion`;
-  }
+  private handleDBExceptions(error: any) {
+    if (error.code === '23505') throw new BadRequestException(error.detail);
 
-  remove(id: number) {
-    return `This action removes a #${id} circunscripcion`;
+    this.logger.error(error);
+    throw new InternalServerErrorException(
+      'Error inesperado, revisar los logs del servidor',
+    );
   }
 }

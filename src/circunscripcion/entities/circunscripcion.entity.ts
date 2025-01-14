@@ -1,18 +1,18 @@
-import { Canton } from 'src/canton/entities/canton.entity';
+import { Parroquia } from 'src/parroquia/entities/parroquia.entity';
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class Circunscripcion {
   @PrimaryGeneratedColumn('uuid')
-  id_circunscripcion: string;
+  idCircunscripcion: string;
 
-  @Column('int', { unique: true, nullable: false })
-  codigo_circunscripcion: number;
+  @Column('int', { nullable: false })
+  codigoCircunscripcion: number;
 
   @Column('varchar', { length: 60, nullable: false })
-  nombre_circunscripcion: string;
+  nombreCircunscripcion: string;
 
   // Relación con Cantones
-  @OneToMany(() => Canton, (canton) => canton.circunscripcion)
-  cantones: Canton[];
+  @OneToMany(() => Parroquia, (parroquia) => parroquia.circunscripcion)
+  parroquias: Parroquia[];
 }

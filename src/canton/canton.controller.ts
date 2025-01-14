@@ -1,11 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  BadRequestException,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CantonService } from './canton.service';
 import { CreateCantonDto } from './dto/create-canton.dto';
-import { UpdateCantonDto } from './dto/update-canton.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('canton')
 export class CantonController {
   constructor(private readonly cantonService: CantonService) {}
+
+  @Post('excel')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: '../../uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}-${file.originalname}`);
+        },
+      }),
+    }),
+  )
+  async uploadExcel(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<string> {
+    try {
+      if (!file) {
+        throw new BadRequestException('No se ha subido ningún archivo');
+      }
+
+      const filePath = file.path;
+      await this.cantonService.cargaMasivaCanton(filePath);
+
+      return 'Datos cargados correctamente';
+    } catch (error) {
+      console.error(error.message);
+      throw new Error(
+        `Error al procesar las zonas del archivo Excel: ${error.message}`,
+      );
+    }
+  }
 
   @Post()
   create(@Body() createCantonDto: CreateCantonDto) {
@@ -15,20 +57,5 @@ export class CantonController {
   @Get()
   findAll() {
     return this.cantonService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cantonService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCantonDto: UpdateCantonDto) {
-    return this.cantonService.update(+id, updateCantonDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cantonService.remove(+id);
   }
 }
