@@ -1,26 +1,74 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { CreateCantonDto } from './dto/create-canton.dto';
-import { UpdateCantonDto } from './dto/update-canton.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Canton } from './entities/canton.entity';
+import { Repository } from 'typeorm';
+import { Provincia } from 'src/provincia/entities/provincia.entity';
+import { CommonService } from 'src/common/common.service';
 
 @Injectable()
 export class CantonService {
-  create(createCantonDto: CreateCantonDto) {
-    return 'This action adds a new canton';
+  private readonly logger = new Logger('CantonService');
+
+  constructor(
+    @InjectRepository(Canton)
+    private readonly cantonRepository: Repository<Canton>,
+    @InjectRepository(Provincia)
+    private readonly provinciaRepository: Repository<Provincia>,
+    private readonly commonService: CommonService,
+  ) {}
+
+  async cargaMasivaCanton(filePath: string): Promise<string> {
+    return await this.commonService.loadExcelData<Canton, CreateCantonDto>(
+      filePath,
+      CreateCantonDto,
+      this.cantonRepository,
+      {
+        provincia: {
+          repo: this.provinciaRepository,
+          field: 'codigoProvincia',
+        },
+      },
+    );
   }
 
-  findAll() {
-    return `This action returns all canton`;
+  async create(createCantonDto: CreateCantonDto) {
+    try {
+      const provincia = await this.provinciaRepository.findOneBy({
+        codigoProvincia: createCantonDto.codigoProvincia,
+      });
+
+      if (!provincia) {
+        throw new Error('Provincia no encontrada');
+      }
+
+      const canton = this.cantonRepository.create({
+        ...createCantonDto,
+        provincia,
+      });
+
+      await this.cantonRepository.save(canton);
+      return canton;
+    } catch (error) {
+      this.handleDBExceptions(error);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} canton`;
+  async findAll() {
+    return await this.cantonRepository.find();
   }
 
-  update(id: number, updateCantonDto: UpdateCantonDto) {
-    return `This action updates a #${id} canton`;
-  }
+  private handleDBExceptions(error: any) {
+    if (error.code === '23505') throw new BadRequestException(error.detail);
 
-  remove(id: number) {
-    return `This action removes a #${id} canton`;
+    this.logger.error(error);
+    throw new InternalServerErrorException(
+      'Error inesperado, revisar los logs del servidor',
+    );
   }
 }

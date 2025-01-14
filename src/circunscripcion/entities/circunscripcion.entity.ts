@@ -1,4 +1,4 @@
-import { Canton } from 'src/canton/entities/canton.entity';
+import { Parroquia } from 'src/parroquia/entities/parroquia.entity';
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity()
@@ -13,6 +13,6 @@ export class Circunscripcion {
   nombreCircunscripcion: string;
 
   // Relación con Cantones
-  @OneToMany(() => Canton, (canton) => canton.circunscripcion)
-  cantones: Canton[];
+  @OneToMany(() => Parroquia, (parroquia) => parroquia.circunscripcion)
+  parroquias: Parroquia[];
 }

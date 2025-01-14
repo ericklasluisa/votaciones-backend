@@ -1,4 +1,5 @@
 import { Canton } from 'src/canton/entities/canton.entity';
+import { Circunscripcion } from 'src/circunscripcion/entities/circunscripcion.entity';
 import { Recinto } from 'src/recinto/entities/recinto.entity';
 import {
   Column,
@@ -41,4 +42,16 @@ export class Parroquia {
 
   @OneToMany(() => Recinto, (recinto) => recinto.parroquia)
   recintos: Recinto[];
+
+  // Relación opcional con Circunscripción
+  @ManyToOne(
+    () => Circunscripcion,
+    (circunscripcion) => circunscripcion.parroquias,
+    {
+      nullable: true, // Relación opcional
+      onDelete: 'SET NULL', // Si se elimina la circunscripción, los cantones quedan sin asignar
+    },
+  )
+  @JoinColumn({ name: 'id_circunscripcion' })
+  circunscripcion?: Circunscripcion | null;
 }

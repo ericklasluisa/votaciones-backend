@@ -1,5 +1,6 @@
-import { IsInt, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { Provincia } from 'src/provincia/entities/provincia.entity';
 
 export class CreateCantonDto {
   @IsInt()
@@ -9,10 +10,10 @@ export class CreateCantonDto {
   @IsString()
   nombreCanton: string;
 
-  @IsUUID()
-  idProvincia: string;
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
+  codigoProvincia: number;
 
-  @IsUUID()
   @IsOptional()
-  idCircunscripcion?: string | null;
+  provincia?: Provincia;
 }

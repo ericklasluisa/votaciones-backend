@@ -28,12 +28,12 @@ export class CommonService {
       // Resolver relaciones, si se proporcionaron
       if (relations) {
         for (const [key, { repo, field }] of Object.entries(relations)) {
-          if (dto[key]) {
+          if (dto[field]) {
             // Usar el campo especificado para buscar la entidad relacionada
-            const relatedEntity = await repo.findOneBy({ [field]: dto[key] });
+            const relatedEntity = await repo.findOneBy({ [field]: dto[field] });
             if (!relatedEntity) {
               throw new Error(
-                `La relación '${key}' con valor '${dto[key]}' no existe.`,
+                `La relación '${key}' con valor '${dto[field]}' no existe.`,
               );
             }
             dto[key] = relatedEntity; // Sustituye el valor por la entidad completa
