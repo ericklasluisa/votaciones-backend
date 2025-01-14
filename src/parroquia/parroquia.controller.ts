@@ -1,34 +1,54 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  BadRequestException,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { ParroquiaService } from './parroquia.service';
-import { CreateParroquiaDto } from './dto/create-parroquia.dto';
-import { UpdateParroquiaDto } from './dto/update-parroquia.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('parroquia')
 export class ParroquiaController {
   constructor(private readonly parroquiaService: ParroquiaService) {}
 
-  @Post()
-  create(@Body() createParroquiaDto: CreateParroquiaDto) {
-    return this.parroquiaService.create(createParroquiaDto);
+  @Post('excel')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: '../../uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}-${file.originalname}`);
+        },
+      }),
+    }),
+  )
+  async uploadExcel(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<string> {
+    try {
+      if (!file) {
+        throw new BadRequestException('No se ha subido ningún archivo');
+      }
+
+      const filePath = file.path;
+      await this.parroquiaService.cargaMasivaParroquia(filePath);
+
+      return 'Datos cargados correctamente';
+    } catch (error) {
+      console.error(error.message);
+      throw new Error(
+        `Error al procesar las zonas del archivo Excel: ${error.message}`,
+      );
+    }
   }
 
   @Get()
   findAll() {
     return this.parroquiaService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.parroquiaService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateParroquiaDto: UpdateParroquiaDto) {
-    return this.parroquiaService.update(+id, updateParroquiaDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.parroquiaService.remove(+id);
   }
 }
