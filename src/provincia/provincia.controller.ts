@@ -38,7 +38,7 @@ export class ProvinciaController {
       }
 
       const filePath = file.path;
-      await this.provinciaService.loadExcelData(filePath);
+      await this.provinciaService.cargaMasivaProvincia(filePath);
 
       return 'Datos cargados correctamente';
     } catch (error) {
