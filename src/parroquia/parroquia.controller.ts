@@ -5,6 +5,8 @@ import {
   BadRequestException,
   UploadedFile,
   UseInterceptors,
+  Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ParroquiaService } from './parroquia.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -50,5 +52,17 @@ export class ParroquiaController {
   @Get()
   findAll() {
     return this.parroquiaService.findAll();
+  }
+
+  @Get('relaciones')
+  findAllWithRelations(
+    @Query('idCanton', new ParseUUIDPipe({ optional: true })) idCanton?: string,
+    @Query('idCircunscripcion', new ParseUUIDPipe({ optional: true }))
+    idCircunscripcion?: string,
+  ) {
+    return this.parroquiaService.findAllWithRelations(
+      idCanton,
+      idCircunscripcion,
+    );
   }
 }

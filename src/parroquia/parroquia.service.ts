@@ -26,6 +26,22 @@ export class ParroquiaService {
     private readonly commonService: CommonService,
   ) {}
 
+  async findAllWithRelations(idCanton?: string, idCircunscripcion?: string) {
+    if (idCircunscripcion && !idCanton) {
+      return await this.parroquiaRepository.find({
+        where: { circunscripcion: { idCircunscripcion } },
+      });
+    }
+    if (idCircunscripcion && idCanton) {
+      return await this.parroquiaRepository.find({
+        where: { canton: { idCanton }, circunscripcion: { idCircunscripcion } },
+      });
+    }
+    return await this.parroquiaRepository.find({
+      where: { canton: { idCanton } },
+    });
+  }
+
   async cargaMasivaParroquia(filePath: string): Promise<string> {
     return await this.commonService.loadExcelData<
       Parroquia,
@@ -43,7 +59,9 @@ export class ParroquiaService {
   }
 
   async findAll() {
-    return await this.parroquiaRepository.find();
+    return await this.parroquiaRepository.find({
+      relations: ['canton', 'circunscripcion'],
+    });
   }
 
   private handleDBExceptions(error: any) {
