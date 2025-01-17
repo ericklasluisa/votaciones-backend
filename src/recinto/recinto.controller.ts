@@ -19,7 +19,7 @@ export class RecintoController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.recintoService.findOne(+id);
+    return this.recintoService.findOne(id);
   }
 
   @Patch(':id')

@@ -21,8 +21,6 @@ export class ZonaService {
     return await this.zonaRepository.save(newZona);
   }
 
-  
-
   async findAll(): Promise<Zona[]> {
     return await this.zonaRepository.find();
   }
@@ -36,10 +34,23 @@ export class ZonaService {
     const sheetName = workbook.SheetNames[0];
     const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
+    for (const [index, row] of data.entries()) {
+      if (typeof row['nombreZona'] !== 'string' || row['nombreZona'].trim() === '') {
+        throw new Error(
+          `Error en la fila ${index + 2}: nombreZona debe ser una cadena de texto válida.`
+        );
+      }
+      if (typeof row['codigoZona'] !== 'number') {
+        throw new Error(
+          `Error en la fila ${index + 2}: codigoZona debe ser un número válido.`
+        );
+      }
+    }
+
     const zonasDtos = data.map((row: any) => 
       plainToInstance(CreateZonaDto, {
         codigoZona: parseInt(row['codigoZona'], 10),
-        nombreZona: row['nombreZona'],
+        nombreZona: row['nombreZona']
       }),
     );
 

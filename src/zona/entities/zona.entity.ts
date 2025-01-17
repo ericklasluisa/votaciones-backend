@@ -8,7 +8,6 @@ export class Zona {
 
   @Column('int', {
     nullable: false,
-    unique: true,
   })
   codigoZona: number;
 
