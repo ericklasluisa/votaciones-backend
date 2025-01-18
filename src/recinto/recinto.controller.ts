@@ -2,23 +2,29 @@ import {
   Controller,
   Get,
   Post,
-  Body,
-  Patch,
   Param,
-  Delete,
   BadRequestException,
   UploadedFile,
   UseInterceptors,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { RecintoService } from './recinto.service';
-import { CreateRecintoDto } from './dto/create-recinto.dto';
-import { UpdateRecintoDto } from './dto/update-recinto.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 
 @Controller('recinto')
 export class RecintoController {
   constructor(private readonly recintoService: RecintoService) {}
+
+  @Get('relaciones')
+  findAllWithRelations(
+    @Query('idParroquia', new ParseUUIDPipe({ optional: true }))
+    idParroquia?: string,
+    @Query('idZona', new ParseUUIDPipe({ optional: true })) idZona?: string,
+  ) {
+    return this.recintoService.findAllWithRelations(idZona, idParroquia);
+  }
 
   @Post('excel')
   @UseInterceptors(
@@ -53,11 +59,6 @@ export class RecintoController {
     }
   }
 
-  @Post()
-  create(@Body() createRecintoDto: CreateRecintoDto) {
-    return this.recintoService.create(createRecintoDto);
-  }
-
   @Get()
   findAll() {
     return this.recintoService.findAll();
@@ -66,15 +67,5 @@ export class RecintoController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.recintoService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRecintoDto: UpdateRecintoDto) {
-    return this.recintoService.update(+id, updateRecintoDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.recintoService.remove(+id);
   }
 }

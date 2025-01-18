@@ -3,8 +3,10 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { JuntaService } from './junta.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -50,5 +52,10 @@ export class JuntaController {
   @Get()
   findAll() {
     return this.juntaService.findAll();
+  }
+
+  @Get('recinto')
+  findAllByRecinto(@Query('idRecinto', new ParseUUIDPipe()) idRecinto: string) {
+    return this.juntaService.findAllByRecinto(idRecinto);
   }
 }
