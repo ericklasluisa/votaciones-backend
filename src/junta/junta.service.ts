@@ -28,15 +28,10 @@ export class JuntaService {
 
     for (const row of data) {
       const codigoRecinto = row['codigoRecinto'];
-      console.log(codigoRecinto);
       const junIniF = row['junIniF'];
-      console.log(junIniF);
       const junFinF = row['junFinF'];
-      console.log(junFinF);
       const junIniM = row['junIniM'];
-      console.log(junIniM);
       const junFinM = row['junFinM'];
-      console.log(junFinM);
 
       const recinto = await this.recintoRepository.findOneBy({ codigoRecinto });
       if (!recinto) {
