@@ -1,8 +1,8 @@
 import {
-  BadRequestException,
   Injectable,
-  InternalServerErrorException,
   Logger,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Parroquia } from './entities/parroquia.entity';
@@ -27,19 +27,35 @@ export class ParroquiaService {
   ) {}
 
   async findAllWithRelations(idCanton?: string, idCircunscripcion?: string) {
+    if (!idCanton && !idCircunscripcion) {
+      throw new BadRequestException(
+        'Debe proporcionar al menos un parámetro: idCanton o idCircunscripcion',
+      );
+    }
+
+    let parroquias: Parroquia[];
+
     if (idCircunscripcion && !idCanton) {
-      return await this.parroquiaRepository.find({
+      parroquias = await this.parroquiaRepository.find({
         where: { circunscripcion: { idCircunscripcion } },
       });
-    }
-    if (idCircunscripcion && idCanton) {
-      return await this.parroquiaRepository.find({
+    } else if (idCircunscripcion && idCanton) {
+      parroquias = await this.parroquiaRepository.find({
         where: { canton: { idCanton }, circunscripcion: { idCircunscripcion } },
       });
+    } else {
+      parroquias = await this.parroquiaRepository.find({
+        where: { canton: { idCanton } },
+      });
     }
-    return await this.parroquiaRepository.find({
-      where: { canton: { idCanton } },
-    });
+
+    if (!parroquias.length) {
+      throw new NotFoundException(
+        'No se encontraron parroquias con los criterios dados',
+      );
+    }
+
+    return parroquias;
   }
 
   async cargaMasivaParroquia(filePath: string): Promise<string> {
@@ -62,14 +78,5 @@ export class ParroquiaService {
     return await this.parroquiaRepository.find({
       relations: ['canton', 'circunscripcion'],
     });
-  }
-
-  private handleDBExceptions(error: any) {
-    if (error.code === '23505') throw new BadRequestException(error.detail);
-
-    this.logger.error(error);
-    throw new InternalServerErrorException(
-      'Error inesperado, revisar los logs del servidor',
-    );
   }
 }

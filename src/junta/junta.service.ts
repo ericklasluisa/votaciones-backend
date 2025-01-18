@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Junta } from './entities/junta.entity';
 import { Repository } from 'typeorm';
@@ -64,5 +69,25 @@ export class JuntaService {
     return await this.juntaRepository.find({
       relations: ['recinto'],
     });
+  }
+
+  async findAllByRecinto(idRecinto: string): Promise<Junta[]> {
+    if (!idRecinto) {
+      throw new BadRequestException(
+        'Debe proporcionar el parámetro: idRecinto',
+      );
+    }
+
+    const juntas = await this.juntaRepository.find({
+      where: { recinto: { idRecinto } },
+    });
+
+    if (!juntas.length) {
+      throw new NotFoundException(
+        'No se encontraron juntas para el recinto dado',
+      );
+    }
+
+    return juntas;
   }
 }

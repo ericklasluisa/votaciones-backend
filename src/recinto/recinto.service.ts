@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateRecintoDto } from './dto/create-recinto.dto';
-import { UpdateRecintoDto } from './dto/update-recinto.dto';
 import { Recinto } from './entities/recinto.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Parroquia } from 'src/parroquia/entities/parroquia.entity';
 import { Zona } from 'src/zona/entities/zona.entity';
-import * as xlsx from 'xlsx';
-import { plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
 import { CommonService } from 'src/common/common.service';
 
 @Injectable()
@@ -41,98 +41,39 @@ export class RecintoService {
     );
   }
 
-  async create(createRecintoDto: CreateRecintoDto): Promise<Recinto> {
-    const newRecinto = this.recintoRepository.create(createRecintoDto);
-    return this.recintoRepository.save(newRecinto);
-  }
-
-  async processExcel(filePath: string) {
-    const relations = {
-      parroquia: {
-        repo: this.parroquiaRepository,
-        field: 'name',
-      },
-      zona: {
-        repo: this.zonaRepository,
-        field: 'code', // Campo clave en la entidad Zona
-      },
-    };
-
-    try {
-      const result = await this.commonService.loadExcelData(
-        filePath,
-        CreateRecintoDto, // DTO para los datos de Recinto
-        this.recintoRepository, // Repositorio principal
-        relations, // Relaciones con Parroquia y Zona
+  async findAllWithRelations(
+    idZona?: string,
+    idParroquia?: string,
+  ): Promise<Recinto[]> {
+    if (!idZona && !idParroquia) {
+      throw new BadRequestException(
+        'Debe proporcionar al menos un parámetro: idZona o idParroquia',
       );
-      console.log(result); // Resultado exitoso
-    } catch (error) {
-      console.error('Error al procesar el archivo Excel:', error.message);
-      throw error;
     }
-  }
 
-  async loadRecintosExcel(filePath: string): Promise<string> {
-    const workbook = xlsx.readFile(filePath);
-    const sheetName = workbook.SheetNames[0];
-    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    let recintos: Recinto[];
 
-    for (const [index, row] of data.entries()) {
-      // Validar claves foráneas
-      const parroquia = await this.parroquiaRepository.findOneBy({
-        codigoParroquia: row['codigoParroquia'],
+    if (idParroquia && !idZona) {
+      recintos = await this.recintoRepository.find({
+        where: { parroquia: { idParroquia } },
       });
-      if (!parroquia) {
-        throw new Error(
-          `Error en la fila ${index + 2}: La parroquia con código ${row['codigoParroquia']} no existe.`,
-        );
-      }
-
-      const zona = await this.zonaRepository.findOneBy({
-        codigoZona: row['codigoZona'],
+    } else if (idParroquia && idZona) {
+      recintos = await this.recintoRepository.find({
+        where: { parroquia: { idParroquia }, zona: { idZona } },
       });
-      if (!zona) {
-        throw new Error(
-          `Error en la fila ${index + 2}: La zona con código ${row['codigoZona']} no existe.`,
-        );
-      }
-
-      const dto = plainToInstance(CreateRecintoDto, {
-        codigoRecinto: row['codigoRecinto'],
-        nombreRecinto: row['nombreRecinto'],
-        direccionRecinto: row['direccionRecinto'],
-        telefonoRecinto: row['telefonoRecinto'],
-        coorX: row['coorX'] || null,
-        coorY: row['coorY'] || null,
-        longitud: row['longitud'] || null,
-        latitud: row['latitud'] || null,
+    } else {
+      recintos = await this.recintoRepository.find({
+        where: { zona: { idZona } },
       });
-
-      const errors = await validate(dto);
-      if (errors.length > 0) {
-        throw new Error(
-          `Error en la fila ${index + 2}: ${JSON.stringify(errors)}`,
-        );
-      }
-
-      // Crear instancia del recinto con claves foráneas
-      const recinto = this.recintoRepository.create({
-        codigoRecinto: dto.codigoRecinto,
-        nombreRecinto: dto.nombreRecinto,
-        direccionRecinto: dto.direccionRecinto,
-        telefonoRecinto: dto.telefonoRecinto,
-        coorX: dto.coorX,
-        coorY: dto.coorY,
-        longitud: dto.longitud,
-        latitud: dto.latitud,
-        parroquia,
-        zona,
-      });
-
-      await this.recintoRepository.save(recinto);
-
-      return 'Datos cargados correctamente';
     }
+
+    if (!recintos.length) {
+      throw new NotFoundException(
+        'No se encontraron recintos con los criterios dados',
+      );
+    }
+
+    return recintos;
   }
 
   async findAll(): Promise<Recinto[]> {
@@ -140,14 +81,12 @@ export class RecintoService {
   }
 
   async findOne(id: string): Promise<Recinto> {
-    return this.recintoRepository.findOne({ where: { idRecinto: id } });
-  }
-
-  update(id: number, updateRecintoDto: UpdateRecintoDto) {
-    return `This action updates a #${id} recinto`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} recinto`;
+    const recinto = await this.recintoRepository.findOne({
+      where: { idRecinto: id },
+    });
+    if (!recinto) {
+      throw new NotFoundException(`Recinto con ID ${id} no encontrado`);
+    }
+    return recinto;
   }
 }
