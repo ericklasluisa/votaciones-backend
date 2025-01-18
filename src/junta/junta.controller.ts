@@ -1,34 +1,54 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { JuntaService } from './junta.service';
-import { CreateJuntaDto } from './dto/create-junta.dto';
-import { UpdateJuntaDto } from './dto/update-junta.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('junta')
 export class JuntaController {
   constructor(private readonly juntaService: JuntaService) {}
 
-  @Post()
-  create(@Body() createJuntaDto: CreateJuntaDto) {
-    return this.juntaService.create(createJuntaDto);
+  @Post('excel')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: '../../uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}-${file.originalname}`);
+        },
+      }),
+    }),
+  )
+  async uploadExcel(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<string> {
+    try {
+      if (!file) {
+        throw new BadRequestException('No se ha subido ningún archivo');
+      }
+
+      const filePath = file.path;
+      await this.juntaService.cargaMasivaJunta(filePath);
+
+      return 'Datos cargados correctamente';
+    } catch (error) {
+      console.error(error.message);
+      throw new Error(
+        `Error al procesar las zonas del archivo Excel: ${error.message}`,
+      );
+    }
   }
 
   @Get()
   findAll() {
     return this.juntaService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.juntaService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateJuntaDto: UpdateJuntaDto) {
-    return this.juntaService.update(+id, updateJuntaDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.juntaService.remove(+id);
   }
 }

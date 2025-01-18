@@ -23,14 +23,9 @@ export class Recinto {
 
   @Column('varchar', {
     nullable: false,
-    length: 60,
+    length: 300,
   })
   nombreRecinto: string;
-
-  @Column('int', {
-    nullable: false,
-  })
-  numElectores: number;
 
   @Column('varchar', {
     length: 250,
@@ -42,12 +37,7 @@ export class Recinto {
     length: 10,
     nullable: true,
   })
-  telefonoRecinto: string | null;
-
-  @Column('int', {
-    nullable: true,
-  })
-  zonaUtm: number | null;
+  telefonoRecinto?: string | null;
 
   @Column('float8', {
     nullable: true,
@@ -69,12 +59,6 @@ export class Recinto {
   })
   latitud: number | null;
 
-  @Column('varchar', {
-    length: 5,
-    nullable: true,
-  })
-  urbano_rural: string | null;
-
   //relaciones
   @ManyToOne(() => Parroquia, (parroquia) => parroquia.recintos, {
     nullable: false,
@@ -83,10 +67,10 @@ export class Recinto {
   parroquia: Parroquia;
 
   @ManyToOne(() => Zona, (zona) => zona.recintos, {
-    nullable: false,
+    nullable: true,
   })
   @JoinColumn({ name: 'idZona' })
-  zona: Zona;
+  zona?: Zona;
 
   @OneToMany(() => Junta, (junta) => junta.recinto)
   juntas: Junta[];

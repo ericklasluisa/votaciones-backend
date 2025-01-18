@@ -13,7 +13,6 @@ import { CommonService } from 'src/common/common.service';
 
 @Injectable()
 export class RecintoService {
-
   constructor(
     @InjectRepository(Recinto)
     private recintoRepository: Repository<Recinto>,
@@ -23,18 +22,35 @@ export class RecintoService {
     private zonaRepository: Repository<Zona>,
     private readonly commonService: CommonService,
   ) {}
-  
+
+  async cargaMasivaRecinto(filePath: string): Promise<string> {
+    return await this.commonService.loadExcelData<Recinto, CreateRecintoDto>(
+      filePath,
+      CreateRecintoDto,
+      this.recintoRepository,
+      {
+        parroquia: {
+          repo: this.parroquiaRepository,
+          field: 'codigoParroquia',
+        },
+        zona: {
+          repo: this.zonaRepository,
+          field: 'nombreZona',
+        },
+      },
+    );
+  }
+
   async create(createRecintoDto: CreateRecintoDto): Promise<Recinto> {
     const newRecinto = this.recintoRepository.create(createRecintoDto);
     return this.recintoRepository.save(newRecinto);
   }
 
-
   async processExcel(filePath: string) {
     const relations = {
       parroquia: {
         repo: this.parroquiaRepository,
-        field: 'name', 
+        field: 'name',
       },
       zona: {
         repo: this.zonaRepository,
@@ -45,7 +61,7 @@ export class RecintoService {
     try {
       const result = await this.commonService.loadExcelData(
         filePath,
-        RecintoDto, // DTO para los datos de Recinto
+        CreateRecintoDto, // DTO para los datos de Recinto
         this.recintoRepository, // Repositorio principal
         relations, // Relaciones con Parroquia y Zona
       );
@@ -55,10 +71,8 @@ export class RecintoService {
       throw error;
     }
   }
-  
 
-
-  async loadRecintosExcel(filePath: string): Promise<string>{
+  async loadRecintosExcel(filePath: string): Promise<string> {
     const workbook = xlsx.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
@@ -69,16 +83,20 @@ export class RecintoService {
         codigoParroquia: row['codigoParroquia'],
       });
       if (!parroquia) {
-        throw new Error(`Error en la fila ${index + 2}: La parroquia con código ${row['codigoParroquia']} no existe.`);
+        throw new Error(
+          `Error en la fila ${index + 2}: La parroquia con código ${row['codigoParroquia']} no existe.`,
+        );
       }
 
       const zona = await this.zonaRepository.findOneBy({
         codigoZona: row['codigoZona'],
       });
       if (!zona) {
-        throw new Error(`Error en la fila ${index + 2}: La zona con código ${row['codigoZona']} no existe.`);
+        throw new Error(
+          `Error en la fila ${index + 2}: La zona con código ${row['codigoZona']} no existe.`,
+        );
       }
-      
+
       const dto = plainToInstance(CreateRecintoDto, {
         codigoRecinto: row['codigoRecinto'],
         nombreRecinto: row['nombreRecinto'],
@@ -92,7 +110,9 @@ export class RecintoService {
 
       const errors = await validate(dto);
       if (errors.length > 0) {
-        throw new Error(`Error en la fila ${index + 2}: ${JSON.stringify(errors)}`);
+        throw new Error(
+          `Error en la fila ${index + 2}: ${JSON.stringify(errors)}`,
+        );
       }
 
       // Crear instancia del recinto con claves foráneas
@@ -114,21 +134,14 @@ export class RecintoService {
       return 'Datos cargados correctamente';
     }
   }
-      
-    
 
-  
   async findAll(): Promise<Recinto[]> {
     return this.recintoRepository.find();
   }
 
-  async findOne(id: string): Promise< Recinto> {
-    return this.recintoRepository.findOne({where: {idRecinto: id}});
+  async findOne(id: string): Promise<Recinto> {
+    return this.recintoRepository.findOne({ where: { idRecinto: id } });
   }
-
-
-
-
 
   update(id: number, updateRecintoDto: UpdateRecintoDto) {
     return `This action updates a #${id} recinto`;

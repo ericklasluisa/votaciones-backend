@@ -1,10 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { ZonaService } from './zona.service';
 import { CreateZonaDto } from './dto/create-zona.dto';
 import { UpdateZonaDto } from './dto/update-zona.dto';
 import { diskStorage } from 'multer';
 import { FileInterceptor } from '@nestjs/platform-express';
-
 
 @Controller('zona')
 export class ZonaController {
@@ -16,18 +25,23 @@ export class ZonaController {
   }
 
   @Post('loadExcelData')
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: '../../uploads', 
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, `${uniqueSuffix}-${file.originalname}`);
-      },
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: '../../uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}-${file.originalname}`);
+        },
+      }),
     }),
-  }))
-  async uploadExcel(@UploadedFile() file: Express.Multer.File): Promise<string> {
-    try{
-      if (!file){
+  )
+  async uploadExcel(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<string> {
+    try {
+      if (!file) {
         throw new Error('No se ha subido ningún archivo');
       }
 
@@ -35,12 +49,13 @@ export class ZonaController {
       await this.zonaService.loadExcelData(filePath);
 
       return 'Datos cargados correctamente';
-    }catch (error){
+    } catch (error) {
       console.error(error.message);
-      throw new Error(`Error al procesar las zonas del archivo Excel: ${error.message}` );
+      throw new Error(
+        `Error al procesar las zonas del archivo Excel: ${error.message}`,
+      );
     }
   }
-    
 
   @Get()
   findAll() {
@@ -51,9 +66,6 @@ export class ZonaController {
   findOne(@Param('id') id: string) {
     return this.zonaService.findOne(id);
   }
-
-
-
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateZonaDto: UpdateZonaDto) {

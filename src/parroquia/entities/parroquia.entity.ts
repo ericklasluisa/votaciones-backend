@@ -52,6 +52,6 @@ export class Parroquia {
       onDelete: 'SET NULL', // Si se elimina la circunscripción, los cantones quedan sin asignar
     },
   )
-  @JoinColumn({ name: 'id_circunscripcion' })
+  @JoinColumn({ name: 'idCircunscripcion' })
   circunscripcion?: Circunscripcion | null;
 }

@@ -16,7 +16,7 @@ export class Junta {
 
   @Column('int', {
     nullable: false,
-    unique: true,
+    unique: false,
   })
   numJunta: number;
 

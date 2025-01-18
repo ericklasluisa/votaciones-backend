@@ -46,6 +46,7 @@ export class CommonService {
       if (errors.length > 0) {
         throw new Error(`Error en la fila: ${JSON.stringify(errors)}`);
       }
+      console.log(dto['codigoRecinto']);
     }
 
     try {
