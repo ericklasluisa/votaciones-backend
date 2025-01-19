@@ -6,8 +6,8 @@ import {
   BadRequestException,
   UploadedFile,
   UseInterceptors,
-  Param,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { CantonService } from './canton.service';
 import { CreateCantonDto } from './dto/create-canton.dto';
@@ -61,14 +61,14 @@ export class CantonController {
     return this.cantonService.findAll();
   }
 
-  @Get('menu/:idProvincia')
-  findAllMenu(@Param('idProvincia', ParseUUIDPipe) idProvincia: string) {
+  @Get('menu')
+  findAllMenu(@Query('idProvincia', ParseUUIDPipe) idProvincia: string) {
     return this.cantonService.findAllMenu(idProvincia);
   }
 
   @Get(':idProvincia')
   findAllWithProvincia(
-    @Param('idProvincia', ParseUUIDPipe) idProvincia: string,
+    @Query('idProvincia', ParseUUIDPipe) idProvincia: string,
   ) {
     return this.cantonService.findByProvincia(idProvincia);
   }
