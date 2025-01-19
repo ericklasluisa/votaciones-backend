@@ -61,6 +61,11 @@ export class CantonController {
     return this.cantonService.findAll();
   }
 
+  @Get('menu/:idProvincia')
+  findAllMenu(@Param('idProvincia', ParseUUIDPipe) idProvincia: string) {
+    return this.cantonService.findAllMenu(idProvincia);
+  }
+
   @Get(':idProvincia')
   findAllWithProvincia(
     @Param('idProvincia', ParseUUIDPipe) idProvincia: string,

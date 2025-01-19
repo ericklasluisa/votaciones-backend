@@ -89,4 +89,39 @@ export class RecintoService {
     }
     return recinto;
   }
+
+  async findAllMenu(idZona?: string, idParroquia?: string) {
+    if (!idZona && !idParroquia) {
+      throw new BadRequestException(
+        'Debe proporcionar al menos un parámetro: idZona o idParroquia',
+      );
+    }
+
+    let recintos: Recinto[];
+
+    if (idParroquia && !idZona) {
+      recintos = await this.recintoRepository.find({
+        where: { parroquia: { idParroquia } },
+      });
+    } else if (idParroquia && idZona) {
+      recintos = await this.recintoRepository.find({
+        where: { parroquia: { idParroquia }, zona: { idZona } },
+      });
+    } else {
+      recintos = await this.recintoRepository.find({
+        where: { zona: { idZona } },
+      });
+    }
+
+    if (!recintos.length) {
+      throw new NotFoundException(
+        'No se encontraron recintos con los criterios dados',
+      );
+    }
+
+    return recintos.map((recinto) => ({
+      value: recinto.idRecinto,
+      label: recinto.nombreRecinto,
+    }));
+  }
 }

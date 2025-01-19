@@ -69,6 +69,15 @@ export class CantonService {
     });
   }
 
+  async findAllMenu(idProvincia: string) {
+    return await this.cantonRepository
+      .createQueryBuilder('canton')
+      .select(['canton.idCanton as value', 'canton.nombreCanton as label'])
+      .where('canton.idProvincia = :idProvincia', { idProvincia })
+      .orderBy('canton.nombreCanton', 'ASC')
+      .getRawMany();
+  }
+
   private handleDBExceptions(error: any) {
     if (error.code === '23505') throw new BadRequestException(error.detail);
 

@@ -36,9 +36,7 @@ export class ParroquiaService {
     let parroquias: Parroquia[];
 
     if (idCircunscripcion && !idCanton) {
-      parroquias = await this.parroquiaRepository.find({
-        where: { circunscripcion: { idCircunscripcion } },
-      });
+      throw new BadRequestException('Debe proporcionar el idCanton');
     } else if (idCircunscripcion && idCanton) {
       parroquias = await this.parroquiaRepository.find({
         where: { canton: { idCanton }, circunscripcion: { idCircunscripcion } },
@@ -78,5 +76,40 @@ export class ParroquiaService {
     return await this.parroquiaRepository.find({
       relations: ['canton', 'circunscripcion'],
     });
+  }
+
+  async findAllMenu(idCanton?: string, idCircunscripcion?: string) {
+    if (!idCanton && !idCircunscripcion) {
+      throw new BadRequestException(
+        'Debe proporcionar al menos un parámetro: idCanton o idCircunscripcion',
+      );
+    }
+
+    if (idCircunscripcion && !idCanton) {
+      throw new BadRequestException('Debe proporcionar el idCanton');
+    }
+    const parroquias = await this.parroquiaRepository.find({
+      where: idCircunscripcion
+        ? { canton: { idCanton }, circunscripcion: { idCircunscripcion } }
+        : { canton: { idCanton } },
+      select: {
+        idParroquia: true,
+        nombreParroquia: true,
+      },
+      order: {
+        nombreParroquia: 'ASC',
+      },
+    });
+
+    if (!parroquias.length) {
+      throw new NotFoundException(
+        'No se encontraron parroquias con los criterios dados',
+      );
+    }
+
+    return parroquias.map((parroquia) => ({
+      value: parroquia.idParroquia,
+      label: parroquia.nombreParroquia,
+    }));
   }
 }

@@ -26,6 +26,15 @@ export class RecintoController {
     return this.recintoService.findAllWithRelations(idZona, idParroquia);
   }
 
+  @Get('menu')
+  findAllMenu(
+    @Query('idParroquia', new ParseUUIDPipe({ optional: true }))
+    idParroquia?: string,
+    @Query('idZona', new ParseUUIDPipe({ optional: true })) idZona?: string,
+  ) {
+    return this.recintoService.findAllMenu(idZona, idParroquia);
+  }
+
   @Post('excel')
   @UseInterceptors(
     FileInterceptor('file', {

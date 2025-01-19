@@ -43,6 +43,17 @@ export class CircunscripcionService {
     return await this.circunscripcionRepository.find();
   }
 
+  async findAllMenu() {
+    return await this.circunscripcionRepository
+      .createQueryBuilder('circunscripcion')
+      .select([
+        'circunscripcion.idCircunscripcion as value',
+        'circunscripcion.nombreCircunscripcion as label',
+      ])
+      .orderBy('circunscripcion.nombreCircunscripcion', 'ASC')
+      .getRawMany();
+  }
+
   private handleDBExceptions(error: any) {
     if (error.code === '23505') throw new BadRequestException(error.detail);
 
