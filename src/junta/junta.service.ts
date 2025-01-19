@@ -85,4 +85,27 @@ export class JuntaService {
 
     return juntas;
   }
+
+  async findAllMenu(idRecinto: string) {
+    if (!idRecinto) {
+      throw new BadRequestException(
+        'Debe proporcionar el parámetro: idRecinto',
+      );
+    }
+
+    const juntas = await this.juntaRepository.find({
+      where: { recinto: { idRecinto } },
+    });
+
+    if (!juntas.length) {
+      throw new NotFoundException(
+        'No se encontraron juntas para el recinto dado',
+      );
+    }
+
+    return juntas.map((junta) => ({
+      value: junta.idJunta,
+      label: `${junta.numJunta} - ${junta.genero}`,
+    }));
+  }
 }

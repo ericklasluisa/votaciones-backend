@@ -41,6 +41,17 @@ export class ProvinciaService {
     return await this.provinciaRepository.find();
   }
 
+  async findAllMenu() {
+    return await this.provinciaRepository
+      .createQueryBuilder('provincia')
+      .select([
+        'provincia.idProvincia as value',
+        'provincia.nombreProvincia as label',
+      ])
+      .orderBy('provincia.nombreProvincia', 'ASC')
+      .getRawMany();
+  }
+
   private handleDBExceptions(error: any) {
     if (error.code === '23505') throw new BadRequestException(error.detail);
 

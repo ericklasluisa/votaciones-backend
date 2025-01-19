@@ -60,4 +60,9 @@ export class CircunscripcionController {
   findAll() {
     return this.circunscripcionService.findAll();
   }
+
+  @Get('menu')
+  findAllMenu() {
+    return this.circunscripcionService.findAllMenu();
+  }
 }

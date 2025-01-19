@@ -65,4 +65,13 @@ export class ParroquiaController {
       idCircunscripcion,
     );
   }
+
+  @Get('menu')
+  findAllMenu(
+    @Query('idCanton', new ParseUUIDPipe({ optional: true })) idCanton?: string,
+    @Query('idCircunscripcion', new ParseUUIDPipe({ optional: true }))
+    idCircunscripcion?: string,
+  ) {
+    return this.parroquiaService.findAllMenu(idCanton, idCircunscripcion);
+  }
 }

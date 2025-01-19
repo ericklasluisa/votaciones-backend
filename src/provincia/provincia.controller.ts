@@ -58,4 +58,9 @@ export class ProvinciaController {
   findAll() {
     return this.provinciaService.findAll();
   }
+
+  @Get('menu')
+  findAllMenu() {
+    return this.provinciaService.findAllMenu();
+  }
 }

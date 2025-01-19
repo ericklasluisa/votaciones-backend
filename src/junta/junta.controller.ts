@@ -58,4 +58,9 @@ export class JuntaController {
   findAllByRecinto(@Query('idRecinto', new ParseUUIDPipe()) idRecinto: string) {
     return this.juntaService.findAllByRecinto(idRecinto);
   }
+
+  @Get('menu')
+  findAllMenu(@Query('idRecinto', new ParseUUIDPipe()) idRecinto: string) {
+    return this.juntaService.findAllMenu(idRecinto);
+  }
 }

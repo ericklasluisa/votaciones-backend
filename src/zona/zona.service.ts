@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateZonaDto } from './dto/create-zona.dto';
-import { UpdateZonaDto } from './dto/update-zona.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Zona } from './entities/zona.entity';
@@ -10,7 +9,6 @@ import { validate } from 'class-validator';
 
 @Injectable()
 export class ZonaService {
-
   constructor(
     @InjectRepository(Zona)
     private zonaRepository: Repository<Zona>,
@@ -26,31 +24,34 @@ export class ZonaService {
   }
 
   async findOne(id: string): Promise<Zona> {
-    return await this.zonaRepository.findOne({where: {idZona: id}});
+    return await this.zonaRepository.findOne({ where: { idZona: id } });
   }
 
-  async loadExcelData(filePath: string): Promise<void>{
+  async loadExcelData(filePath: string): Promise<void> {
     const workbook = xlsx.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
     for (const [index, row] of data.entries()) {
-      if (typeof row['nombreZona'] !== 'string' || row['nombreZona'].trim() === '') {
+      if (
+        typeof row['nombreZona'] !== 'string' ||
+        row['nombreZona'].trim() === ''
+      ) {
         throw new Error(
-          `Error en la fila ${index + 2}: nombreZona debe ser una cadena de texto válida.`
+          `Error en la fila ${index + 2}: nombreZona debe ser una cadena de texto válida.`,
         );
       }
       if (typeof row['codigoZona'] !== 'number') {
         throw new Error(
-          `Error en la fila ${index + 2}: codigoZona debe ser un número válido.`
+          `Error en la fila ${index + 2}: codigoZona debe ser un número válido.`,
         );
       }
     }
 
-    const zonasDtos = data.map((row: any) => 
+    const zonasDtos = data.map((row: any) =>
       plainToInstance(CreateZonaDto, {
         codigoZona: parseInt(row['codigoZona'], 10),
-        nombreZona: row['nombreZona']
+        nombreZona: row['nombreZona'],
       }),
     );
 
@@ -61,7 +62,7 @@ export class ZonaService {
       }
     }
 
-    const zonas = zonasDtos.map((dto) => 
+    const zonas = zonasDtos.map((dto) =>
       this.zonaRepository.create({
         codigoZona: dto.codigoZona,
         nombreZona: dto.nombreZona,
@@ -70,12 +71,11 @@ export class ZonaService {
     await this.zonaRepository.save(zonas);
   }
 
-
-  update(id: number, updateZonaDto: UpdateZonaDto) {
-    return `This action updates a #${id} zona`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} zona`;
+  async findAllMenu(): Promise<{ value: string; label: string }[]> {
+    const zonas = await this.zonaRepository.find();
+    return zonas.map((zona) => ({
+      value: zona.idZona,
+      label: zona.nombreZona,
+    }));
   }
 }
