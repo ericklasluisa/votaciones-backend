@@ -7,6 +7,10 @@ export class CreateDignidadDto {
   @IsString()
   nombreDignidad: string;
 
+  @IsInt()
+  @Transform(({ value }) => parseInt(value, 10))
+  codigoDignidad: number;
+
   @IsOptional()
   @IsInt()
   @Transform(({ value }) => parseInt(value))
