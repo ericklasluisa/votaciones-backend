@@ -10,6 +10,7 @@ export class SimulacionController {
   @Post()
   create(@Body() createSimulacionDto: CreateSimulacionDto) {
     return this.simulacionService.create(createSimulacionDto);
+    
   }
 
   @Get()
