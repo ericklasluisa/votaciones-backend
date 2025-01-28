@@ -21,6 +21,11 @@ export class Dignidad {
   })
   nombreDignidad: string;
 
+  @Column('int',{
+    nullable: false,
+  })
+  codigoDignidad: number;
+
   // relaciones
   @OneToMany(() => Candidato, (candidato) => candidato.dignidad)
   candidatos: Candidato[];

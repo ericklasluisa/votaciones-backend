@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { Repository, DeepPartial } from 'typeorm';
 import * as xlsx from 'xlsx';
 import { plainToInstance } from 'class-transformer';
@@ -57,4 +57,13 @@ export class CommonService {
       throw new Error(`Error al guardar datos: ${error.message}`);
     }
   }
+
+  public handleDBExceptions(error: any, logger:Logger) {
+        if (error.code === '23505') throw new BadRequestException(error.detail);
+    
+        logger.error(error);
+        throw new InternalServerErrorException(
+          'Error inesperado, revisar los logs del servidor',
+        );
+      }
 }

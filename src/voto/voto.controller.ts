@@ -19,12 +19,12 @@ export class VotoController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.votoService.findOne(+id);
+    return this.votoService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVotoDto: UpdateVotoDto) {
-    return this.votoService.update(+id, updateVotoDto);
+  updateCantidad(@Param('id') id: string, @Body() updateVotoDto: UpdateVotoDto) {
+    return this.votoService.updateCantidad(id, updateVotoDto);
   }
 
   @Delete(':id')
