@@ -19,7 +19,7 @@ export class SimulacionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.simulacionService.findOne(+id);
+    return this.simulacionService.findOne(id);
   }
 
   @Patch(':id')
