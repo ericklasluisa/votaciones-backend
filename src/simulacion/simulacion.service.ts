@@ -33,6 +33,8 @@ export class SimulacionService {
     return this.simulacionRepository.findOne({where: {idSimulacion: id}});
   }
 
+  
+
   update(id: number, updateSimulacionDto: UpdateSimulacionDto) {
     return `This action updates a #${id} simulacion`;
   }

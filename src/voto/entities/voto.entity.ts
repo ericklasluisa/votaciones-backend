@@ -43,5 +43,5 @@ export class Voto {
     onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'idCandidato' })
-  candidato?: Candidato | null;
+  candidato: Candidato ;
 }
