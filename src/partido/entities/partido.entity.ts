@@ -8,7 +8,7 @@ export class Partido {
 
   @Column('varchar', {
     nullable: false,
-    length: 70,
+    length: 200,
   })
   nombrePartido: string;
 
