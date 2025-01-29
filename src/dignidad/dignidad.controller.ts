@@ -1,15 +1,51 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  BadRequestException,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { DignidadService } from './dignidad.service';
-import { CreateDignidadDto } from './dto/create-dignidad.dto';
-import { UpdateDignidadDto } from './dto/update-dignidad.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('dignidad')
 export class DignidadController {
   constructor(private readonly dignidadService: DignidadService) {}
 
-  @Post()
-  create(@Body() createDignidadDto: CreateDignidadDto) {
-    return this.dignidadService.create(createDignidadDto);
+  @Post('excel')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: '../../uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}-${file.originalname}`);
+        },
+      }),
+    }),
+  )
+  async uploadExcel(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<string> {
+    try {
+      if (!file) {
+        throw new BadRequestException('No se ha subido ningún archivo');
+      }
+
+      const filePath = file.path;
+      await this.dignidadService.cargaMasivaDignidad(filePath);
+
+      return 'Datos cargados correctamente';
+    } catch (error) {
+      console.error(error.message);
+      throw new Error(
+        `Error al procesar las zonas del archivo Excel: ${error.message}`,
+      );
+    }
   }
 
   @Get()
@@ -20,15 +56,5 @@ export class DignidadController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.dignidadService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDignidadDto: UpdateDignidadDto) {
-    return this.dignidadService.update(+id, updateDignidadDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.dignidadService.remove(+id);
   }
 }

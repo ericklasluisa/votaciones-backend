@@ -21,7 +21,7 @@ export class Dignidad {
   })
   nombreDignidad: string;
 
-  @Column('int',{
+  @Column('int', {
     nullable: false,
   })
   codigoDignidad: number;
