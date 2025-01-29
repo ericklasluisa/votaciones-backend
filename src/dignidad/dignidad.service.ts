@@ -3,8 +3,6 @@ import { CreateDignidadDto } from './dto/create-dignidad.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Dignidad } from './entities/dignidad.entity';
 import { Repository } from 'typeorm';
-import { Provincia } from 'src/provincia/entities/provincia.entity';
-import { Canton } from 'src/canton/entities/canton.entity';
 import { CommonService } from 'src/common/common.service';
 
 @Injectable()
@@ -31,5 +29,16 @@ export class DignidadService {
 
   findOne(id: number) {
     return `This action returns a #${id} dignidad`;
+  }
+
+  async findAllMenu() {
+    return await this.dignidadRepository
+      .createQueryBuilder('dignidad')
+      .select([
+        'dignidad.idDignidad as value',
+        'dignidad.nombreDignidad as label',
+      ])
+      .orderBy('dignidad.nombreDignidad', 'ASC')
+      .getRawMany();
   }
 }

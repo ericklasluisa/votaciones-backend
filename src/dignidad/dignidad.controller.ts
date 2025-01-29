@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Param,
   BadRequestException,
   UploadedFile,
   UseInterceptors,
@@ -53,8 +52,8 @@ export class DignidadController {
     return this.dignidadService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.dignidadService.findOne(+id);
+  @Get('menu')
+  findAllMenu() {
+    return this.dignidadService.findAllMenu();
   }
 }
