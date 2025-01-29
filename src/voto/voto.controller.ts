@@ -22,13 +22,10 @@ export class VotoController {
     return this.votoService.findOne(id);
   }
 
-  @Patch(':id')
-  updateCantidad(@Param('id') id: string, @Body() updateVotoDto: UpdateVotoDto) {
-    return this.votoService.updateCantidad(id, updateVotoDto);
+  @Patch(':cantidad')
+  updateCantidad(@Param('cantidad') cantidad: number, @Body() idCandidato: string, @Body() idSimulacion: string, @Body() idJunta: string) {
+    return this.votoService.updateCantidad(idCandidato, idSimulacion, idJunta, cantidad);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.votoService.remove(+id);
-  }
+  
 }
