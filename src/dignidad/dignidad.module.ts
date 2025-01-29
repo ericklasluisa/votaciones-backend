@@ -9,7 +9,7 @@ import { CommonModule } from 'src/common/common.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Dignidad, Provincia, Canton]),
+    TypeOrmModule.forFeature([Dignidad]),
     CommonModule,
   ],
   controllers: [DignidadController],

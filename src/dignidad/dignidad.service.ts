@@ -14,10 +14,6 @@ export class DignidadService {
   constructor(
     @InjectRepository(Dignidad)
     private readonly dignidadRepository: Repository<Dignidad>,
-    @InjectRepository(Provincia)
-    private readonly provinciaRepository: Repository<Provincia>,
-    @InjectRepository(Canton)
-    private readonly cantonRepository: Repository<Canton>,
     private readonly commonService: CommonService,
   ) {}
 
@@ -26,16 +22,6 @@ export class DignidadService {
       filePath,
       CreateDignidadDto,
       this.dignidadRepository,
-      {
-        provincia: {
-          repo: this.provinciaRepository,
-          field: 'codigoProvincia',
-        },
-        canton: {
-          repo: this.cantonRepository,
-          field: 'codigoCanton',
-        },
-      },
     );
   }
 

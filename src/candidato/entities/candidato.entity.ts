@@ -1,5 +1,8 @@
+import { Canton } from 'src/canton/entities/canton.entity';
+import { Circunscripcion } from 'src/circunscripcion/entities/circunscripcion.entity';
 import { Dignidad } from 'src/dignidad/entities/dignidad.entity';
 import { Partido } from 'src/partido/entities/partido.entity';
+import { Provincia } from 'src/provincia/entities/provincia.entity';
 import { Voto } from 'src/voto/entities/voto.entity';
 import {
   Column,
@@ -47,4 +50,19 @@ export class Candidato {
   })
   @JoinColumn({ name: 'idDignidad' })
   dignidad: Dignidad;
+
+
+  @ManyToOne(() => Provincia, (provincia) => provincia.candidatos, {
+    nullable: true,
+  })
+  @JoinColumn({ name: 'idProvincia' })
+  provincia?: Provincia | null;
+
+  @ManyToOne(() => Circunscripcion, (circunscripcion) => circunscripcion.candidatos, {
+    nullable: true,
+  })
+  @JoinColumn({ name: 'idCircunscripcion' })
+  circunscripcion?: Circunscripcion | null;
+
+
 }

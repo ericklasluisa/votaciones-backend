@@ -30,15 +30,5 @@ export class Dignidad {
   @OneToMany(() => Candidato, (candidato) => candidato.dignidad)
   candidatos: Candidato[];
 
-  @ManyToOne(() => Provincia, (provincia) => provincia.dignidades, {
-    nullable: true,
-  })
-  @JoinColumn({ name: 'idProvincia' })
-  provincia?: Provincia | null;
-
-  @ManyToOne(() => Canton, (canton) => canton.dignidades, {
-    nullable: true,
-  })
-  @JoinColumn({ name: 'idCanton' })
-  canton?: Canton | null;
+  
 }

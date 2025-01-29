@@ -1,3 +1,4 @@
+import { Candidato } from 'src/candidato/entities/candidato.entity';
 import { Canton } from 'src/canton/entities/canton.entity';
 import { Dignidad } from 'src/dignidad/entities/dignidad.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
@@ -53,6 +54,6 @@ export class Provincia {
   @OneToMany(() => Canton, (canton) => canton.provincia)
   cantones: Canton[];
 
-  @OneToMany(() => Dignidad, (dignidad) => dignidad.provincia)
-  dignidades: Dignidad[];
+  @OneToMany(() => Candidato, (candidato) => candidato.provincia)
+  candidatos: Candidato[];
 }
