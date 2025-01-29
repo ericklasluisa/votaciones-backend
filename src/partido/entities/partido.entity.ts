@@ -17,10 +17,11 @@ export class Partido {
   })
   numPartido: number;
 
-  @Column('bytea', {
+  @Column('varchar', {
     nullable: true,
+    length: 500,
   })
-  fotoPartido: Buffer | null;
+  fotoPartido: string | null;
 
   // relaciones
   @OneToMany(() => Candidato, (candidato) => candidato.partido)

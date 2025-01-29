@@ -1,14 +1,5 @@
 import { Candidato } from 'src/candidato/entities/candidato.entity';
-import { Canton } from 'src/canton/entities/canton.entity';
-import { Provincia } from 'src/provincia/entities/provincia.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Dignidad {
@@ -26,9 +17,13 @@ export class Dignidad {
   })
   codigoDignidad: number;
 
+  @Column('varchar', {
+    nullable: true,
+    length: 500,
+  })
+  fotoDignidad: string | null;
+
   // relaciones
   @OneToMany(() => Candidato, (candidato) => candidato.dignidad)
   candidatos: Candidato[];
-
-  
 }

@@ -1,4 +1,3 @@
-import { Canton } from 'src/canton/entities/canton.entity';
 import { Circunscripcion } from 'src/circunscripcion/entities/circunscripcion.entity';
 import { Dignidad } from 'src/dignidad/entities/dignidad.entity';
 import { Partido } from 'src/partido/entities/partido.entity';
@@ -30,10 +29,11 @@ export class Candidato {
   })
   posicion: string | null;
 
-  @Column('bytea', {
+  @Column('varchar', {
     nullable: true,
+    length: 500,
   })
-  fotoCandidato: Buffer | null;
+  fotoCandidato: string | null;
 
   // relaciones
   @OneToMany(() => Voto, (voto) => voto.candidato)
@@ -51,18 +51,19 @@ export class Candidato {
   @JoinColumn({ name: 'idDignidad' })
   dignidad: Dignidad;
 
-
   @ManyToOne(() => Provincia, (provincia) => provincia.candidatos, {
     nullable: true,
   })
   @JoinColumn({ name: 'idProvincia' })
   provincia?: Provincia | null;
 
-  @ManyToOne(() => Circunscripcion, (circunscripcion) => circunscripcion.candidatos, {
-    nullable: true,
-  })
+  @ManyToOne(
+    () => Circunscripcion,
+    (circunscripcion) => circunscripcion.candidatos,
+    {
+      nullable: true,
+    },
+  )
   @JoinColumn({ name: 'idCircunscripcion' })
   circunscripcion?: Circunscripcion | null;
-
-
 }
