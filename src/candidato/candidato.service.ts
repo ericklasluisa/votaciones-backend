@@ -3,11 +3,13 @@ import { CreateCandidatoDto } from './dto/create-candidato.dto';
 import { UpdateCandidatoDto } from './dto/update-candidato.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Candidato } from './entities/candidato.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CommonService } from 'src/common/common.service';
 import { PartialGraphHost } from '@nestjs/core';
 import { Partido } from 'src/partido/entities/partido.entity';
 import { Dignidad } from 'src/dignidad/entities/dignidad.entity';
+import { Provincia } from 'src/provincia/entities/provincia.entity';
+import { Circunscripcion } from 'src/circunscripcion/entities/circunscripcion.entity';
 
 @Injectable()
 export class CandidatoService {
@@ -20,6 +22,11 @@ export class CandidatoService {
     private readonly partidoRepository: Repository<Partido>,
     @InjectRepository(Dignidad)
     private readonly dignidadRepository: Repository<Dignidad>,
+    @InjectRepository(Provincia)
+    private readonly provinciaRepository: Repository<Provincia>,
+    @InjectRepository(Circunscripcion)
+    private readonly circunscripcionRepository: Repository<Circunscripcion>,
+    
     private readonly commonService: CommonService,
   ) {}
 
@@ -36,6 +43,14 @@ export class CandidatoService {
         partido:{
           repo: this.partidoRepository,
           field: 'numPartido'
+        },
+        provincia: {
+          repo: this.provinciaRepository,
+          field: 'codigoProvincia'
+        },
+        circunscripcion: {
+          repo: this.circunscripcionRepository,
+          field: 'nombreCircunscripcion'
         }
       }
     )

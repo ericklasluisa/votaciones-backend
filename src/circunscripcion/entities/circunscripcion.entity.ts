@@ -1,3 +1,4 @@
+import { Candidato } from 'src/candidato/entities/candidato.entity';
 import { Parroquia } from 'src/parroquia/entities/parroquia.entity';
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
@@ -15,4 +16,8 @@ export class Circunscripcion {
   // Relación con Cantones
   @OneToMany(() => Parroquia, (parroquia) => parroquia.circunscripcion)
   parroquias: Parroquia[];
+
+  // Relación con Candidatos
+  @OneToMany(() => Candidato, (candidato) => candidato.circunscripcion) 
+  candidatos: Candidato[];
 }

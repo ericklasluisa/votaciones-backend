@@ -11,19 +11,4 @@ export class CreateDignidadDto {
   @Transform(({ value }) => parseInt(value, 10))
   codigoDignidad: number;
 
-  @IsOptional()
-  @IsInt()
-  @Transform(({ value }) => parseInt(value))
-  codigoProvincia?: number;
-
-  @IsOptional()
-  @IsInt()
-  @Transform(({ value }) => parseInt(value))
-  codigoCanton?: number;
-
-  @IsOptional()
-  provincia?: Provincia;
-
-  @IsOptional()
-  canton?: Canton;
 }

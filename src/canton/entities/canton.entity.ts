@@ -37,6 +37,5 @@ export class Canton {
   @OneToMany(() => Parroquia, (parroquia) => parroquia.canton)
   parroquias: Parroquia[];
 
-  @OneToMany(() => Dignidad, (dignidad) => dignidad.canton)
-  dignidades: Dignidad[];
+  
 }
