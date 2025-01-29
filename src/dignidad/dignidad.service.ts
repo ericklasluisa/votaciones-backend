@@ -35,8 +35,8 @@ export class DignidadService {
     return await this.dignidadRepository
       .createQueryBuilder('dignidad')
       .select([
-        'dignidad.idDignidad as value',
-        'dignidad.nombreDignidad as label',
+        'dignidad.idDignidad as id',
+        'dignidad.nombreDignidad as nombre',
       ])
       .orderBy('dignidad.nombreDignidad', 'ASC')
       .getRawMany();
