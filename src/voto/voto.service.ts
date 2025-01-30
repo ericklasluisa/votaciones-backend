@@ -70,14 +70,54 @@ export class VotoService {
     });
 
     if (!voto) {
-      throw new BadRequestException(
-        `No se encontró un voto con idCandidato=${idCandidato}, idSimulacion=${idSimulacion}, idJunta=${idJunta}`,
-      );
+      console.log(`No se encontró un voto con idCandidato=${idCandidato}, idSimulacion=${idSimulacion}, idJunta=${idJunta}`);
+      return null;
     }
 
     return voto;
   }
   
+
+  async upsertVoto(
+    candidatos: { idCandidato: string, cantidad: number }[],
+    idJunta: string,
+    idSimulacion: string
+  ) {
+      const junta = await this.juntaRepository.findOne({ where: { idJunta } });
+      const simulacion = await this.simulacionRepository.findOne({ where: { idSimulacion } });
+
+      if (!junta || !simulacion) {
+          throw new Error('Junta o Simulación no encontrada');
+      }
+
+      for (const candidatoData of candidatos) {
+          const candidato = await this.candidatoRepository.findOne({ where: { idCandidato: candidatoData.idCandidato } });
+
+          if (!candidato) {
+              throw new Error(`Candidato con id ${candidatoData.idCandidato} no encontrado`);
+          }
+
+          let voto = await this.findVotoByForeignKeys(candidato.idCandidato, idSimulacion, idJunta);
+
+          if (voto) {
+              voto.cantidad += candidatoData.cantidad;
+              console.log("Voto actualizado")
+          } else {
+              voto = this.votoRepository.create({
+                  tipoVoto: "valido", 
+                  cantidad: candidatoData.cantidad,
+                  junta,
+                  simulacion,
+                  candidato,
+              });
+              console.log("Voto creado")
+          }
+
+          await this.votoRepository.save(voto);
+      }
+  }
+
+
 
 
   async updateCantidad(idCandidato: string, idSimulacion: string, idJunta: string, cantidad: number){

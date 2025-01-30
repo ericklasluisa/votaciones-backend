@@ -1,6 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { SimulacionService } from './simulacion.service';
-import { CreateSimulacionDto } from './dto/create-simulacion.dto';
 import { UpdateSimulacionDto } from './dto/update-simulacion.dto';
 
 @Controller('simulacion')
@@ -8,9 +7,19 @@ export class SimulacionController {
   constructor(private readonly simulacionService: SimulacionService) {}
 
   @Post()
-  create(@Body() createSimulacionDto: CreateSimulacionDto) {
-    return this.simulacionService.create(createSimulacionDto);
+  create(@Body('nombreSimulacion') nombreSimulacion: string) {
+    return this.simulacionService.create(nombreSimulacion);
     
+  }
+
+  @Get('/activa')
+  simulacionActiva(){
+    return this.simulacionService.findSimulacionActiva();
+  }
+
+  @Patch('/terminarSimulacion/:id')
+  terminarSimulacion(@Param('id') id: string){
+    return this.simulacionService.terminarSimulacion(id);
   }
 
   @Get()
