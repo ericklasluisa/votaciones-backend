@@ -59,46 +59,47 @@ export class CandidatoService {
 
   async findcandidatoscConRelaciones(
     idDignidad: string,
-    idPartido: string,
     idCircunscripcion?: string,
     idProvincia?: string,
   ) {
-    if (!idDignidad && !idPartido) {
+    if (!idDignidad) {
       throw new BadRequestException(
-        'Debe proporcionar idDignidad y idPartido como parámetros',
+        'Debe proporcionar idDignidad como parámetro',
       );
     }
 
     let candidatos: Candidato[];
+    const relations = ['partido'];
 
     if (idProvincia && !idCircunscripcion) {
       candidatos = await this.candidatoRepository.find({
         where: {
           dignidad: { idDignidad },
-          partido: { idPartido },
           provincia: { idProvincia },
         },
+        relations,
       });
     } else if (idProvincia && idCircunscripcion) {
       candidatos = await this.candidatoRepository.find({
         where: {
           dignidad: { idDignidad },
-          partido: { idPartido },
           provincia: { idProvincia },
           circunscripcion: { idCircunscripcion },
         },
+        relations,
       });
     } else if (!idProvincia && idCircunscripcion) {
       candidatos = await this.candidatoRepository.find({
         where: {
           dignidad: { idDignidad },
-          partido: { idPartido },
           circunscripcion: { idCircunscripcion },
         },
+        relations,
       });
     } else {
       candidatos = await this.candidatoRepository.find({
-        where: { dignidad: { idDignidad }, partido: { idPartido } },
+        where: { dignidad: { idDignidad } },
+        relations,
       });
     }
 
@@ -108,6 +109,25 @@ export class CandidatoService {
       );
     }
 
-    return candidatos;
+    // Agrupar por partido con estructura simplificada
+    const candidatosPorPartido = candidatos.reduce((acc, candidato) => {
+      const partidoId = candidato.partido.idPartido;
+      if (!acc[partidoId]) {
+        acc[partidoId] = {
+          idPartido: candidato.partido.idPartido,
+          nombrePartido: candidato.partido.nombrePartido,
+          numPartido: candidato.partido.numPartido,
+          candidatos: [],
+        };
+      }
+      // Omitimos partido directamente sin asignarlo a una variable
+      const candidatoSinPartido = Object.fromEntries(
+        Object.entries(candidato).filter(([key]) => key !== 'partido'),
+      );
+      acc[partidoId].candidatos.push(candidatoSinPartido);
+      return acc;
+    }, {});
+
+    return Object.values(candidatosPorPartido);
   }
 }
