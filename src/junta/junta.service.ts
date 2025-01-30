@@ -104,8 +104,9 @@ export class JuntaService {
     }
 
     return juntas.map((junta) => ({
-      value: junta.idJunta,
-      label: `${junta.numJunta} - ${junta.genero}`,
+      idJunta: junta.idJunta,
+      numJunta: junta.numJunta,
+      genero: junta.genero,
     }));
   }
 }
