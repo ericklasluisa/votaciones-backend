@@ -13,6 +13,8 @@ import { Partido } from 'src/partido/entities/partido.entity';
 import { Dignidad } from 'src/dignidad/entities/dignidad.entity';
 import { Provincia } from 'src/provincia/entities/provincia.entity';
 import { Circunscripcion } from 'src/circunscripcion/entities/circunscripcion.entity';
+import { Junta } from 'src/junta/entities/junta.entity';
+import { Voto } from 'src/voto/entities/voto.entity';
 
 @Injectable()
 export class CandidatoService {
@@ -29,6 +31,10 @@ export class CandidatoService {
     private readonly provinciaRepository: Repository<Provincia>,
     @InjectRepository(Circunscripcion)
     private readonly circunscripcionRepository: Repository<Circunscripcion>,
+    @InjectRepository(Junta)
+    private readonly juntaRepository: Repository<Junta>,
+    @InjectRepository(Voto)
+    private readonly votoRepository: Repository<Voto>,
 
     private readonly commonService: CommonService,
   ) {}
@@ -130,4 +136,125 @@ export class CandidatoService {
 
     return Object.values(candidatosPorPartido);
   }
+
+
+  async votosPorCandidato(
+    idDignidad: string,
+    idRecinto: string,
+    idSimulacion: string,
+    idCircunscripcion?: string,
+    idProvincia?: string,
+  ) {
+    if (!idDignidad) {
+      throw new BadRequestException('Debe proporcionar idDignidad como parámetro');
+    }
+    if (!idRecinto) {
+      throw new BadRequestException('Debe proporcionar idRecinto como parámetro');
+    }
+  
+    let candidatos: Candidato[];
+    const relations = ['partido'];
+  
+    if (idProvincia && !idCircunscripcion) {
+      candidatos = await this.candidatoRepository.find({
+        where: {
+          dignidad: { idDignidad },
+          provincia: { idProvincia },
+        },
+        relations,
+      });
+    } else if (idProvincia && idCircunscripcion) {
+      candidatos = await this.candidatoRepository.find({
+        where: {
+          dignidad: { idDignidad },
+          provincia: { idProvincia },
+          circunscripcion: { idCircunscripcion },
+        },
+        relations,
+      });
+    } else if (!idProvincia && idCircunscripcion) {
+      candidatos = await this.candidatoRepository.find({
+        where: {
+          dignidad: { idDignidad },
+          circunscripcion: { idCircunscripcion },
+        },
+        relations,
+      });
+    } else {
+      candidatos = await this.candidatoRepository.find({
+        where: { dignidad: { idDignidad } },
+        relations,
+      });
+    }
+  
+    if (!candidatos.length) {
+      throw new NotFoundException(
+        'No se encontraron candidatos con los criterios dados',
+      );
+    }
+  
+    // Obtener juntas del recinto
+    const juntas = await this.juntaRepository.find({
+      where: { recinto: { idRecinto } },
+    });
+  
+    // Construir la estructura del JSON
+    const resultado = [];
+  
+    for (const junta of juntas) {
+      // Inicializar la estructura de la junta
+      const juntaData = {
+        idJunta: junta.idJunta,
+        numJunta: junta.numJunta,
+        genero: junta.genero,
+        partidos: [],
+      };
+  
+      // Agrupar candidatos por partido
+      const partidosMap = new Map<string, any>();
+      for (const candidato of candidatos) {
+        const idPartido = candidato.partido?.idPartido || 'SIN_PARTIDO';
+        if (!partidosMap.has(idPartido)) {
+          partidosMap.set(idPartido, {
+            idPartido: idPartido === 'SIN_PARTIDO' ? null : idPartido,
+            nombrePartido: candidato.partido?.nombrePartido || 'Sin Partido',
+            candidatos: [],
+          });
+        }
+  
+        var voto = await this.votoRepository.findOne({
+          where: {
+            candidato: { idCandidato: candidato.idCandidato },
+            junta: { idJunta: junta.idJunta },
+            simulacion: { idSimulacion: idSimulacion },
+          }
+        })
+
+        let numVotos
+
+        if(voto){
+          numVotos = voto.cantidad;
+        }else{
+          numVotos = 0;
+        }
+        
+        // Agregar el candidato al partido
+        partidosMap.get(idPartido).candidatos.push({
+          idCandidato: candidato.idCandidato,
+          nombreCandidato: candidato.nombreCandidato,
+          numVotos: numVotos,
+        });
+      }
+  
+      // Agregar los partidos a la junta
+      juntaData.partidos = Array.from(partidosMap.values());
+      resultado.push(juntaData);
+    }
+  
+    return resultado;
+  }
+  
+
+
+
 }
