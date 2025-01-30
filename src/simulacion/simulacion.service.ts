@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { CreateSimulacionDto } from './dto/create-simulacion.dto';
 import { UpdateSimulacionDto } from './dto/update-simulacion.dto';
 import { Repository } from 'typeorm';
 import { Simulacion } from './entities/simulacion.entity';
@@ -13,9 +12,15 @@ export class SimulacionService {
     private readonly simulacionRepository: Repository<Simulacion>,
    ) {}
 
-  async create(createSimulacionDto: CreateSimulacionDto) {
+  async create(nombreSimulacion: string) {
     try{
-      const simulacion = this.simulacionRepository.create(createSimulacionDto);
+      const simulacion = this.simulacionRepository.create(
+        {
+          nombreSimulacion: nombreSimulacion,
+          estado: true,
+          fechaCreacion: new Date()
+        }
+      );
       await this.simulacionRepository.save(simulacion);
       return simulacion;
     }catch(e){
@@ -23,6 +28,23 @@ export class SimulacionService {
     }
     
     return 'This action adds a new simulacion';
+  }
+
+  async findSimulacionActiva(){
+    return await this.simulacionRepository.findOne({where: {estado: true}});
+  }
+
+  async terminarSimulacion(id: string){
+    console.log(id);
+    const simulacion = await this.simulacionRepository.findOne({where: {idSimulacion: id}});
+
+    if(simulacion){
+      simulacion.estado = false;
+      await this.simulacionRepository.save(simulacion);
+      return simulacion;
+    }else{
+    throw new BadRequestException("No se encontro la simulacion");
+    }
   }
 
   async findAll() {

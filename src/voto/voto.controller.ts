@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { VotoService } from './voto.service';
 import { CreateVotoDto } from './dto/create-voto.dto';
 import { UpdateVotoDto } from './dto/update-voto.dto';
+import { UpsertVotoDto } from './dto/upsert-voto.dto';
 
 @Controller('voto')
 export class VotoController {
@@ -11,6 +12,12 @@ export class VotoController {
   create(@Body() createVotoDto: CreateVotoDto) {
     return this.votoService.create(createVotoDto);
   }
+
+  @Post('/upsertVoto')
+  async upsertVoto(@Body() upserVotoDto: UpsertVotoDto){
+    return this.votoService.upsertVoto(upserVotoDto.candidatos, upserVotoDto.idJunta, upserVotoDto.idSimulacion);
+  }
+
 
   @Get()
   findAll() {
