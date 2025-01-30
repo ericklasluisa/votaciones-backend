@@ -87,4 +87,19 @@ export class CandidatoController {
       idProvincia,
     );
   }
+
+
+  @Get('/votosCandidatoJunta')
+  findVotosCandidatoJunta(
+    @Query('candidatos')
+    candidatos: string[],
+    @Query('juntas')
+    juntas: string[],
+    @Query('idSimulacion', new ParseUUIDPipe({ optional: false }))
+    idSimulacion: string,
+  ) {
+    return this.candidatoService.votosCandidatoJunta(candidatos, juntas, idSimulacion);
+  }
+
+
 }
