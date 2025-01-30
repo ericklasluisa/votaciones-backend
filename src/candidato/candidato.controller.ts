@@ -53,8 +53,6 @@ export class CandidatoController {
   findcandidatoscConRelaciones(
     @Query('idDignidad', new ParseUUIDPipe({ optional: false }))
     idDignidad: string,
-    @Query('idPartido', new ParseUUIDPipe({ optional: false }))
-    idPartido: string,
     @Query('idCircunscripcion', new ParseUUIDPipe({ optional: true }))
     idCircunscripcion?: string,
     @Query('idProvincia', new ParseUUIDPipe({ optional: true }))
@@ -62,7 +60,6 @@ export class CandidatoController {
   ) {
     return this.candidatoService.findcandidatoscConRelaciones(
       idDignidad,
-      idPartido,
       idCircunscripcion,
       idProvincia,
     );
