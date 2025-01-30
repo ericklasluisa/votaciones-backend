@@ -64,4 +64,27 @@ export class CandidatoController {
       idProvincia,
     );
   }
+
+  @Get('/menuCandidatos')
+  findcandidatoscMenu(
+    @Query('idDignidad', new ParseUUIDPipe({ optional: false }))
+    idDignidad: string,
+    @Query('idRecinto', new ParseUUIDPipe({optional: false}))
+    idRecinto: string,
+    @Query('idSimulacion', new ParseUUIDPipe({optional: false}))
+    idSimulacion: string,
+    @Query('idCircunscripcion', new ParseUUIDPipe({ optional: true }))
+    idCircunscripcion?: string,
+    @Query('idProvincia', new ParseUUIDPipe({ optional: true }))
+    idProvincia?: string,
+
+  ) {
+    return this.candidatoService.votosPorCandidato(
+      idDignidad,
+      idRecinto,
+      idSimulacion,
+      idCircunscripcion,
+      idProvincia,
+    );
+  }
 }
