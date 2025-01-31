@@ -130,7 +130,8 @@ export class CandidatoService {
       const candidatoSimplificado = {
         idCandidato: candidato.idCandidato,
         nombreCandidato: candidato.nombreCandidato,
-        idProvincia: candidato.provincia?.idProvincia || null
+        idProvincia: candidato.provincia?.idProvincia || null,
+        fotoCandidato: candidato.fotoCandidato || null,
       };
       acc[partidoId].candidatos.push(candidatoSimplificado);
       return acc;
@@ -265,30 +266,35 @@ export class CandidatoService {
     idSimulacion: string,
   ) {
     if (!candidatos.length) {
-      throw new BadRequestException('Debe proporcionar candidatos como parámetro');
+      throw new BadRequestException(
+        'Debe proporcionar candidatos como parámetro',
+      );
     }
     if (!juntas.length) {
       throw new BadRequestException('Debe proporcionar idJunta como parámetro');
     }
     if (!idSimulacion) {
-      throw new BadRequestException('Debe proporcionar idSimulacion como parámetro');
+      throw new BadRequestException(
+        'Debe proporcionar idSimulacion como parámetro',
+      );
     }
-  
+
     const votos = await this.votoRepository.find({
       where: {
-        candidato: { idCandidato: In(candidatos) }, 
+        candidato: { idCandidato: In(candidatos) },
         junta: { idJunta: In(juntas) },
         simulacion: { idSimulacion },
       },
-      relations: ['candidato', 'junta'], 
+      relations: ['candidato', 'junta'],
     });
-  
 
-    const resultado = juntas.map(junta => ({
+    const resultado = juntas.map((junta) => ({
       idJunta: junta,
-      candidatos: candidatos.map(candidato => {
+      candidatos: candidatos.map((candidato) => {
         const votoEncontrado = votos.find(
-          voto => voto.candidato.idCandidato === candidato && voto.junta.idJunta === junta
+          (voto) =>
+            voto.candidato.idCandidato === candidato &&
+            voto.junta.idJunta === junta,
         );
         return {
           idCandidato: candidato,
@@ -296,7 +302,7 @@ export class CandidatoService {
         };
       }),
     }));
-  
+
     return resultado;
-  }  
+  }
 }
