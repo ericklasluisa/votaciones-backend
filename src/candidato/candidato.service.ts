@@ -75,7 +75,7 @@ export class CandidatoService {
     }
 
     let candidatos: Candidato[];
-    const relations = ['partido'];
+    const relations = ['partido', 'provincia']; // Añadimos provincia a las relaciones
 
     if (idProvincia && !idCircunscripcion) {
       candidatos = await this.candidatoRepository.find({
@@ -126,17 +126,18 @@ export class CandidatoService {
           candidatos: [],
         };
       }
-      // Omitimos partido directamente sin asignarlo a una variable
-      const candidatoSinPartido = Object.fromEntries(
-        Object.entries(candidato).filter(([key]) => key !== 'partido'),
-      );
-      acc[partidoId].candidatos.push(candidatoSinPartido);
+      // Solo incluimos los campos necesarios
+      const candidatoSimplificado = {
+        idCandidato: candidato.idCandidato,
+        nombreCandidato: candidato.nombreCandidato,
+        idProvincia: candidato.provincia.idProvincia,
+      };
+      acc[partidoId].candidatos.push(candidatoSimplificado);
       return acc;
     }, {});
 
     return Object.values(candidatosPorPartido);
   }
-
 
   async votosPorCandidato(
     idDignidad: string,
@@ -146,15 +147,19 @@ export class CandidatoService {
     idProvincia?: string,
   ) {
     if (!idDignidad) {
-      throw new BadRequestException('Debe proporcionar idDignidad como parámetro');
+      throw new BadRequestException(
+        'Debe proporcionar idDignidad como parámetro',
+      );
     }
     if (!idRecinto) {
-      throw new BadRequestException('Debe proporcionar idRecinto como parámetro');
+      throw new BadRequestException(
+        'Debe proporcionar idRecinto como parámetro',
+      );
     }
-  
+
     let candidatos: Candidato[];
     const relations = ['partido'];
-  
+
     if (idProvincia && !idCircunscripcion) {
       candidatos = await this.candidatoRepository.find({
         where: {
@@ -186,21 +191,21 @@ export class CandidatoService {
         relations,
       });
     }
-  
+
     if (!candidatos.length) {
       throw new NotFoundException(
         'No se encontraron candidatos con los criterios dados',
       );
     }
-  
+
     // Obtener juntas del recinto
     const juntas = await this.juntaRepository.find({
       where: { recinto: { idRecinto } },
     });
-  
+
     // Construir la estructura del JSON
     const resultado = [];
-  
+
     for (const junta of juntas) {
       // Inicializar la estructura de la junta
       const juntaData = {
@@ -209,7 +214,7 @@ export class CandidatoService {
         genero: junta.genero,
         partidos: [],
       };
-  
+
       // Agrupar candidatos por partido
       const partidosMap = new Map<string, any>();
       for (const candidato of candidatos) {
@@ -221,23 +226,23 @@ export class CandidatoService {
             candidatos: [],
           });
         }
-  
+
         var voto = await this.votoRepository.findOne({
           where: {
             candidato: { idCandidato: candidato.idCandidato },
             junta: { idJunta: junta.idJunta },
             simulacion: { idSimulacion: idSimulacion },
-          }
-        })
+          },
+        });
 
-        let numVotos
+        let numVotos;
 
-        if(voto){
+        if (voto) {
           numVotos = voto.cantidad;
-        }else{
+        } else {
           numVotos = 0;
         }
-        
+
         // Agregar el candidato al partido
         partidosMap.get(idPartido).candidatos.push({
           idCandidato: candidato.idCandidato,
@@ -245,16 +250,14 @@ export class CandidatoService {
           numVotos: numVotos,
         });
       }
-  
+
       // Agregar los partidos a la junta
       juntaData.partidos = Array.from(partidosMap.values());
       resultado.push(juntaData);
     }
-  
+
     return resultado;
   }
-  
-
 
   async votosCandidatoJunta(
     candidatos: string[],
@@ -262,23 +265,27 @@ export class CandidatoService {
     idSimulacion: string,
   ) {
     if (!candidatos.length) {
-      throw new BadRequestException('Debe proporcionar candidatos como parámetro');
+      throw new BadRequestException(
+        'Debe proporcionar candidatos como parámetro',
+      );
     }
     if (!juntas.length) {
       throw new BadRequestException('Debe proporcionar idJunta como parámetro');
     }
     if (!idSimulacion) {
-      throw new BadRequestException('Debe proporcionar idSimulacion como parámetro');
+      throw new BadRequestException(
+        'Debe proporcionar idSimulacion como parámetro',
+      );
     }
-  
+
     const resultado = [];
-  
+
     for (const junta of juntas) {
       const juntaData = {
         idJunta: junta,
         candidatos: [],
       };
-  
+
       for (const candidato of candidatos) {
         const voto = await this.votoRepository.findOne({
           where: {
@@ -287,19 +294,17 @@ export class CandidatoService {
             simulacion: { idSimulacion: idSimulacion },
           },
         });
-  
+
         const newCandidato = {
           idCandidato: candidato,
           numVotos: voto ? voto.cantidad : 0,
         };
         juntaData.candidatos.push(newCandidato);
       }
-  
+
       resultado.push(juntaData);
     }
-  
+
     return resultado;
   }
-
-
 }
