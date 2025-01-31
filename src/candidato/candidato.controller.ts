@@ -7,6 +7,7 @@ import {
   Get,
   Query,
   ParseUUIDPipe,
+  Body,
 } from '@nestjs/common';
 import { CandidatoService } from './candidato.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -91,14 +92,15 @@ export class CandidatoController {
 
   @Get('/votosCandidatoJunta')
   findVotosCandidatoJunta(
-    @Query('candidatos')
-    candidatos: string[],
-    @Query('juntas')
-    juntas: string[],
-    @Query('idSimulacion', new ParseUUIDPipe({ optional: false }))
-    idSimulacion: string,
+    @Query('candidatos') candidatos: string | string[],
+    @Query('juntas') juntas: string | string[],
+    @Query('idSimulacion', new ParseUUIDPipe({ optional: false })) idSimulacion: string,
   ) {
-    return this.candidatoService.votosCandidatoJunta(candidatos, juntas, idSimulacion);
+    // Convierte candidatos y juntas en arrays si no lo son
+    const candidatosArray = Array.isArray(candidatos) ? candidatos : [candidatos];
+    const juntasArray = Array.isArray(juntas) ? juntas : [juntas];
+
+    return this.candidatoService.votosCandidatoJunta(candidatosArray, juntasArray, idSimulacion);
   }
 
 
