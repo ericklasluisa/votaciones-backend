@@ -262,47 +262,43 @@ export class CandidatoService {
     idSimulacion: string,
   ) {
     if (!candidatos.length) {
-      throw new BadRequestException(
-        'Debe proporcionar candidatos como parámetro',
-      );
+      throw new BadRequestException('Debe proporcionar candidatos como parámetro');
     }
     if (!juntas.length) {
       throw new BadRequestException('Debe proporcionar idJunta como parámetro');
     }
     if (!idSimulacion) {
-      throw new BadRequestException(
-        'Debe proporcionar idSimulacion como parámetro',
-      );
+      throw new BadRequestException('Debe proporcionar idSimulacion como parámetro');
     }
-
+  
     const resultado = [];
-    const candidatosData = [];
-    const juntaData = [];
-    for(const junta in juntas){
+  
+    for (const junta of juntas) {
       const juntaData = {
         idJunta: junta,
         candidatos: [],
       };
-
-      for (const candidato in candidatos){
-        let voto = await this.votoRepository.findOne({
+  
+      for (const candidato of candidatos) {
+        const voto = await this.votoRepository.findOne({
           where: {
             candidato: { idCandidato: candidato },
             junta: { idJunta: junta },
             simulacion: { idSimulacion: idSimulacion },
-          }
-        })
-
+          },
+        });
+  
         const newCandidato = {
           idCandidato: candidato,
           numVotos: voto ? voto.cantidad : 0,
-        }
-        candidatosData.push(newCandidato);
+        };
+        juntaData.candidatos.push(newCandidato);
       }
-      juntaData.candidatos = candidatosData;
+  
+      resultado.push(juntaData);
     }
-    resultado.push(juntaData);
-
+  
+    return resultado;
   }
 
 
