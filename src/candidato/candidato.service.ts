@@ -126,11 +126,11 @@ export class CandidatoService {
           candidatos: [],
         };
       }
-      // Solo incluimos los campos necesarios
+      // Solo incluimos los campos necesarios y manejamos el caso null de provincia
       const candidatoSimplificado = {
         idCandidato: candidato.idCandidato,
         nombreCandidato: candidato.nombreCandidato,
-        idProvincia: candidato.provincia.idProvincia,
+        idProvincia: candidato.provincia?.idProvincia || null
       };
       acc[partidoId].candidatos.push(candidatoSimplificado);
       return acc;
