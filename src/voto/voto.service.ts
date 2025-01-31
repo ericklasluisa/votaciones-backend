@@ -100,7 +100,7 @@ export class VotoService {
           let voto = await this.findVotoByForeignKeys(candidato.idCandidato, idSimulacion, idJunta);
 
           if (voto) {
-              voto.cantidad += candidatoData.cantidad;
+              voto.cantidad = candidatoData.cantidad;
               console.log("Voto actualizado")
           } else {
               voto = this.votoRepository.create({
