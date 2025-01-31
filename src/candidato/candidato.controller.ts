@@ -70,15 +70,14 @@ export class CandidatoController {
   findcandidatoscMenu(
     @Query('idDignidad', new ParseUUIDPipe({ optional: false }))
     idDignidad: string,
-    @Query('idRecinto', new ParseUUIDPipe({optional: false}))
+    @Query('idRecinto', new ParseUUIDPipe({ optional: false }))
     idRecinto: string,
-    @Query('idSimulacion', new ParseUUIDPipe({optional: false}))
+    @Query('idSimulacion', new ParseUUIDPipe({ optional: false }))
     idSimulacion: string,
     @Query('idCircunscripcion', new ParseUUIDPipe({ optional: true }))
     idCircunscripcion?: string,
     @Query('idProvincia', new ParseUUIDPipe({ optional: true }))
     idProvincia?: string,
-
   ) {
     return this.candidatoService.votosPorCandidato(
       idDignidad,
@@ -89,19 +88,43 @@ export class CandidatoController {
     );
   }
 
-
   @Get('/votosCandidatoJunta')
   findVotosCandidatoJunta(
     @Query('candidatos') candidatos: string | string[],
     @Query('juntas') juntas: string | string[],
-    @Query('idSimulacion', new ParseUUIDPipe({ optional: false })) idSimulacion: string,
+    @Query('idSimulacion', new ParseUUIDPipe({ optional: false }))
+    idSimulacion: string,
   ) {
     // Convierte candidatos y juntas en arrays si no lo son
-    const candidatosArray = Array.isArray(candidatos) ? candidatos : [candidatos];
+    const candidatosArray = Array.isArray(candidatos)
+      ? candidatos
+      : [candidatos];
     const juntasArray = Array.isArray(juntas) ? juntas : [juntas];
 
-    return this.candidatoService.votosCandidatoJunta(candidatosArray, juntasArray, idSimulacion);
+    return this.candidatoService.votosCandidatoJunta(
+      candidatosArray,
+      juntasArray,
+      idSimulacion,
+    );
   }
 
+  @Post('/votosCandidatoJunta')
+  findVotosCandidatoJuntaPost(
+    @Body('candidatos') candidatos: string | string[],
+    @Body('juntas') juntas: string | string[],
+    @Body('idSimulacion', new ParseUUIDPipe({ optional: false }))
+    idSimulacion: string,
+  ) {
+    // Convierte candidatos y juntas en arrays si no lo son
+    const candidatosArray = Array.isArray(candidatos)
+      ? candidatos
+      : [candidatos];
+    const juntasArray = Array.isArray(juntas) ? juntas : [juntas];
 
+    return this.candidatoService.votosCandidatoJunta(
+      candidatosArray,
+      juntasArray,
+      idSimulacion,
+    );
+  }
 }
