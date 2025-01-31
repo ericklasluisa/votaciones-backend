@@ -7,7 +7,7 @@ import {
 import { CreateCandidatoDto } from './dto/create-candidato.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Candidato } from './entities/candidato.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CommonService } from 'src/common/common.service';
 import { Partido } from 'src/partido/entities/partido.entity';
 import { Dignidad } from 'src/dignidad/entities/dignidad.entity';
@@ -265,46 +265,38 @@ export class CandidatoService {
     idSimulacion: string,
   ) {
     if (!candidatos.length) {
-      throw new BadRequestException(
-        'Debe proporcionar candidatos como parámetro',
-      );
+      throw new BadRequestException('Debe proporcionar candidatos como parámetro');
     }
     if (!juntas.length) {
       throw new BadRequestException('Debe proporcionar idJunta como parámetro');
     }
     if (!idSimulacion) {
-      throw new BadRequestException(
-        'Debe proporcionar idSimulacion como parámetro',
-      );
+      throw new BadRequestException('Debe proporcionar idSimulacion como parámetro');
     }
+  
+    const votos = await this.votoRepository.find({
+      where: {
+        candidato: { idCandidato: In(candidatos) }, 
+        junta: { idJunta: In(juntas) },
+        simulacion: { idSimulacion },
+      },
+      relations: ['candidato', 'junta'], 
+    });
+  
 
-    const resultado = [];
-
-    for (const junta of juntas) {
-      const juntaData = {
-        idJunta: junta,
-        candidatos: [],
-      };
-
-      for (const candidato of candidatos) {
-        const voto = await this.votoRepository.findOne({
-          where: {
-            candidato: { idCandidato: candidato },
-            junta: { idJunta: junta },
-            simulacion: { idSimulacion: idSimulacion },
-          },
-        });
-
-        const newCandidato = {
+    const resultado = juntas.map(junta => ({
+      idJunta: junta,
+      candidatos: candidatos.map(candidato => {
+        const votoEncontrado = votos.find(
+          voto => voto.candidato.idCandidato === candidato && voto.junta.idJunta === junta
+        );
+        return {
           idCandidato: candidato,
-          numVotos: voto ? voto.cantidad : 0,
+          numVotos: votoEncontrado ? votoEncontrado.cantidad : 0,
         };
-        juntaData.candidatos.push(newCandidato);
-      }
-
-      resultado.push(juntaData);
-    }
-
+      }),
+    }));
+  
     return resultado;
-  }
+  }  
 }
