@@ -22,6 +22,11 @@ export class SimulacionController {
     return this.simulacionService.terminarSimulacion(id);
   }
 
+  @Patch('/activarSimulacion/:id')
+  activarSimulacion(@Param('id') id: string){
+    return this.simulacionService.activarSimulacion(id);
+  }
+
   @Get()
   findAll() {
     return this.simulacionService.findAll();
