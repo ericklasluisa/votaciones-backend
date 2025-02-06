@@ -15,6 +15,7 @@ import { DignidadModule } from './dignidad/dignidad.module';
 import { PartidoModule } from './partido/partido.module';
 import { SimulacionModule } from './simulacion/simulacion.module';
 import { CommonModule } from './common/common.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { CommonModule } from './common/common.module';
     PartidoModule,
     SimulacionModule,
     CommonModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],

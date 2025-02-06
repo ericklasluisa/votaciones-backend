@@ -47,6 +47,19 @@ export class SimulacionService {
     }
   }
 
+  async activarSimulacion(id: string){
+    console.log(id);
+    const simulacion = await this.simulacionRepository.findOne({where: {idSimulacion: id}});
+
+    if(simulacion){
+      simulacion.estado = true;
+      await this.simulacionRepository.save(simulacion);
+      return simulacion;
+    }else{
+    throw new BadRequestException("No se encontro la simulacion");
+    }
+  }
+
   async findAll() {
     return await this.simulacionRepository.find();
   }
