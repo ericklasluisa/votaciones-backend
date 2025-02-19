@@ -1,26 +1,69 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import { LoginUserDto } from './dto/login-user.dto';
+import * as bcryptjs from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async registro(createUserDto: CreateUserDto) {
+    const hashedPassword = await bcryptjs.hash(createUserDto.password, 10);
+
+    try {
+      const user = await this.userRepository.create({
+        ...createUserDto,
+        password: hashedPassword,
+      });
+
+      await this.userRepository.save(user);
+
+      return 'Usuario creado correctamente';
+    } catch (error) {
+      console.error(error.message);
+      throw new BadRequestException(
+        `Error al registrar el usuario: ${error.message}`,
+      );
+    }
   }
 
-  findAll() {
-    return `This action returns all user`;
-  }
+  async login(loginUserDto: LoginUserDto) {
+    const user = await this.userRepository.findOne({
+      where: { email: loginUserDto.email },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+    const { password, ...result } = user;
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    const validPassword = await bcryptjs.compare(
+      loginUserDto.password,
+      password,
+    );
+
+    if (!validPassword) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    const token = await this.jwtService.signAsync(result);
+
+    return {
+      ...result,
+      token: token,
+    };
   }
 }
